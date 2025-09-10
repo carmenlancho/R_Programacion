@@ -1006,6 +1006,7 @@ Practiquemos un poco más con el dataframe penguins de la librería palmerpengui
 ```{r}
 install.packages("palmerpenguins") # solo se ejecuta 1 vez
 library(palmerpenguins)
+penguins
 ```
 ::: {.callout-note}
 ##  Ejercicios

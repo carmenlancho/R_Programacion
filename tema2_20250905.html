@@ -5060,7 +5060,25 @@ AlumnoB  2           Luis   22    R2
 <p>Practiquemos un poco más con el dataframe penguins de la librería palmerpenguins de R. Para ello, debemos comenzar por instalar y cargar la librería.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb285"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb285-1"><a href="#cb285-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;palmerpenguins&quot;</span>) <span class="co"># solo se ejecuta 1 vez</span></span>
-<span id="cb285-2"><a href="#cb285-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(palmerpenguins)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb285-2"><a href="#cb285-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(palmerpenguins)</span>
+<span id="cb285-3"><a href="#cb285-3" aria-hidden="true" tabindex="-1"></a>penguins</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 344 × 8
+   species island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
+   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;int&gt;       &lt;int&gt;
+ 1 Adelie  Torgersen           39.1          18.7               181        3750
+ 2 Adelie  Torgersen           39.5          17.4               186        3800
+ 3 Adelie  Torgersen           40.3          18                 195        3250
+ 4 Adelie  Torgersen           NA            NA                  NA          NA
+ 5 Adelie  Torgersen           36.7          19.3               193        3450
+ 6 Adelie  Torgersen           39.3          20.6               190        3650
+ 7 Adelie  Torgersen           38.9          17.8               181        3625
+ 8 Adelie  Torgersen           39.2          19.6               195        4675
+ 9 Adelie  Torgersen           34.1          18.1               193        3475
+10 Adelie  Torgersen           42            20.2               190        4250
+# ℹ 334 more rows
+# ℹ 2 more variables: sex &lt;fct&gt;, year &lt;int&gt;</code></pre>
+</div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -5106,10 +5124,10 @@ Soluciones
 <div id="callout-16" class="callout-16-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb286"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb286-1"><a href="#cb286-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(palmerpenguins)</span>
-<span id="cb286-2"><a href="#cb286-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb286-3"><a href="#cb286-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) Inspección</span></span>
-<span id="cb286-4"><a href="#cb286-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(penguins)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb287"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb287-1"><a href="#cb287-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(palmerpenguins)</span>
+<span id="cb287-2"><a href="#cb287-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb287-3"><a href="#cb287-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) Inspección</span></span>
+<span id="cb287-4"><a href="#cb287-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(penguins)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 8
   species island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
@@ -5122,7 +5140,7 @@ Soluciones
 6 Adelie  Torgersen           39.3          20.6               190        3650
 # ℹ 2 more variables: sex &lt;fct&gt;, year &lt;int&gt;</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb288"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb288-1"><a href="#cb288-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(penguins)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb289"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb289-1"><a href="#cb289-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(penguins)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      species          island    bill_length_mm  bill_depth_mm  
  Adelie   :152   Biscoe   :168   Min.   :32.10   Min.   :13.10  
@@ -5141,15 +5159,15 @@ Soluciones
  Max.   :231.0     Max.   :6300                Max.   :2009  
  NA&#39;s   :2         NA&#39;s   :2                                 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb290"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb290-1"><a href="#cb290-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) Conteo por sexo</span></span>
-<span id="cb290-2"><a href="#cb290-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(penguins<span class="sc">$</span>sex)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb291"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb291-1"><a href="#cb291-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) Conteo por sexo</span></span>
+<span id="cb291-2"><a href="#cb291-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(penguins<span class="sc">$</span>sex)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 female   male 
    165    168 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb292"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb292-1"><a href="#cb292-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) Peso de machos en la isla Dream</span></span>
-<span id="cb292-2"><a href="#cb292-2" aria-hidden="true" tabindex="-1"></a>penguins<span class="sc">$</span>body_mass_g[penguins<span class="sc">$</span>island <span class="sc">==</span> <span class="st">&quot;Dream&quot;</span> <span class="sc">&amp;</span> penguins<span class="sc">$</span>sex <span class="sc">==</span> <span class="st">&quot;male&quot;</span>]</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb293"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb293-1"><a href="#cb293-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) Peso de machos en la isla Dream</span></span>
+<span id="cb293-2"><a href="#cb293-2" aria-hidden="true" tabindex="-1"></a>penguins<span class="sc">$</span>body_mass_g[penguins<span class="sc">$</span>island <span class="sc">==</span> <span class="st">&quot;Dream&quot;</span> <span class="sc">&amp;</span> penguins<span class="sc">$</span>sex <span class="sc">==</span> <span class="st">&quot;male&quot;</span>]</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] 3900 3900 4150 3950 4650 3900 4400 4600 3425   NA 4150 3550 3800 3950 4300
 [16] 4450 4300 4350 4100 4475 3900 3975 4250 3475 3725 3650 4250 3750 4000 3900
@@ -5157,8 +5175,8 @@ female   male
 [46] 4100 3600 4800 4500 3950 3550 4450 4300 3250 3950 4050 3450 4050 3800 3950
 [61] 4000 3775 4100</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb294"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb294-1"><a href="#cb294-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 4) Acceso a columnas</span></span>
-<span id="cb294-2"><a href="#cb294-2" aria-hidden="true" tabindex="-1"></a>penguins<span class="sc">$</span>species</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb295"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb295-1"><a href="#cb295-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 4) Acceso a columnas</span></span>
+<span id="cb295-2"><a href="#cb295-2" aria-hidden="true" tabindex="-1"></a>penguins<span class="sc">$</span>species</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  [1] Adelie    Adelie    Adelie    Adelie    Adelie    Adelie    Adelie   
   [8] Adelie    Adelie    Adelie    Adelie    Adelie    Adelie    Adelie   
@@ -5212,7 +5230,7 @@ female   male
 [344] Chinstrap
 Levels: Adelie Chinstrap Gentoo</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb296"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb296-1"><a href="#cb296-1" aria-hidden="true" tabindex="-1"></a>penguins[, <span class="fu">c</span>(<span class="st">&quot;species&quot;</span>, <span class="st">&quot;island&quot;</span>)]</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb297"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb297-1"><a href="#cb297-1" aria-hidden="true" tabindex="-1"></a>penguins[, <span class="fu">c</span>(<span class="st">&quot;species&quot;</span>, <span class="st">&quot;island&quot;</span>)]</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 344 × 2
    species island   
@@ -5229,8 +5247,8 @@ Levels: Adelie Chinstrap Gentoo</code></pre>
 10 Adelie  Torgersen
 # ℹ 334 more rows</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb298"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb298-1"><a href="#cb298-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 5) Número de especies distintas</span></span>
-<span id="cb298-2"><a href="#cb298-2" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">unique</span>(penguins<span class="sc">$</span>species))</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb299"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb299-1"><a href="#cb299-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 5) Número de especies distintas</span></span>
+<span id="cb299-2"><a href="#cb299-2" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">unique</span>(penguins<span class="sc">$</span>species))</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 3</code></pre>
 </div>
