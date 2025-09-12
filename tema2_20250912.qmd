@@ -1,0 +1,442 @@
+---
+title: "Tema 2 — Programación en R"
+lang: es
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    self-contained: true 
+execute:
+  echo: true
+  warning: false
+  message: false
+editor: source
+fontsize: 11pt
+---
+
+
+# Condicionales
+
+Los **condicionales** permiten que un programa tome decisiones dependiendo de si una condición es verdadera o falsa. Una condición es una expresión que se evalúa y devuelve un valor lógico:
+
+ - TRUE (verdadero)
+
+ - FALSE (falso)
+
+Según el resultado, el programa ejecuta unas instrucciones u otras. Así, los condicionales permiten que el programa no sea lineal, sino que pueda ''elegir distintos caminos'' según la situación.
+
+Algunos ejemplos sencillos serían:
+ 
+  - Verificar si un número es positivo o negativo.
+
+  - Comprobar si una persona es mayor de edad.
+
+  - Tomar distintas acciones según el valor de una variable.
+
+  - Clasificar datos en categorías (aprobado/suspenso, par/impar, etc.).
+  
+
+¿Cómo lo haremos en R?
+
+  - `if()`
+  - `else()`
+  - `else if()`
+  - `ifelse()`
+
+## if
+
+Sintaxis:
+
+``` r
+if (condición) {
+  # código que se ejecuta si la condición es verdadera (TRUE)
+}
+
+```
+
+Ejemplo
+```{r}
+x <- 10
+if (x > 0) {
+  print("El número es positivo")
+}
+
+```
+
+Hagamos ahora un código que, dado un número positivo, lo hace negativo:
+```{r}
+num <- 2
+if (num > 0) {
+  num <- num * -1
+}
+print(num)
+```
+
+¿Qué devolverá el siguiente código?
+```{r}
+num <- -4
+if (num > 0) {
+  num <- num * -1
+}
+print(num)
+```
+Añadimos comentarios:
+```{r}
+num <- 4
+if (num > 0) { # Si el número es positivo
+  print('El número es positivo')
+  print('Se transformará en negativo')
+  num <- num * -1 # Multiplicar por -1 para que sea negativo
+}
+print(num)
+```
+
+¿Podríamos hacer esto con un vector?
+```r
+num <- c(4,5,7,-5)
+if (num > 0) { # Si el número es positivo
+  print('El número es positivo')
+  print('Se transformará en negativo')
+  num <- num * -1 # Multiplicar por -1 para que sea negativo
+}
+print(num)
+```
+
+El código `if()` espera un único valor `TRUE` o `FALSE`. Cuando pasamos un vector, se devuelve un vector de `TRUE` o `FALSE`, pero no un único valor. Para que los condicionales lo entiendan, hay que convertirlo en un único valor con las funciones `all()` o `any()`. 
+
+¿Qué hace cada uno de los siguientes códigos?
+
+```{r}
+num <- c(4,5,7,-5)
+if (all(num > 0)) { # Si todos los números son positivos
+  print('Todos los números son positivos')
+  print('Todos los números se multiplicarán por -1 y serán negativos')
+  num <- num * -1 # Multiplicar por -1 todo el vector
+}
+print(num)
+```
+
+```{r}
+num <- c(4,5,7,-5)
+if (any(num > 0)) { # Si algún número es positivo
+  print('Al menos un número es positivo')
+  print('Todos los números se multiplicarán por -1 y cambiarán de signo')
+  num <- num * -1 # Multiplicar por -1 todo el vector
+}
+print(num)
+```
+
+¿Cómo hacemos para solo transformar los positivos?
+```{r}
+num <- c(4,5,7,-5)
+if (any(num > 0)) { # Si algún número es positivo
+  print('Al menos un número es positivo')
+  print('Todos los números serán negativos o 0')
+  num[num>0] <- num[num>0] * -1 # Multiplicar por -1 todo el vector
+}
+print(num)
+```
+
+
+::: {.callout-note}
+##  Ejercicios
+¿Qué devuelven los siguientes códigos?
+
+1. 
+```r
+x <- 10
+if (5 == 5) {
+  x <- 8
+}
+x
+```
+
+2. 
+```r
+x <- 10
+if (TRUE) {
+  x <- 8
+}
+x
+```
+
+3. 
+```r
+x <- 10
+if (x == 10) {
+  x <- 8
+  if (x == 10) {
+    x <- 6
+  }
+}
+x
+```
+:::
+
+
+
+
+## if ... else
+A veces necesitamos ejecutar una acción si la condición es verdadera y otra diferente si es falsa.
+
+Sintaxis:
+
+``` r
+if (condición) {
+  # código si condición es TRUE
+} else {
+  # código si condición es FALSE
+}
+
+```
+
+Ejemplo
+```{r}
+edad <- 17
+if (edad >= 18) {
+  print("Eres mayor de edad")
+} else {
+  print("Eres menor de edad")
+}
+
+
+```
+
+
+## if ... else if ... else
+Podemos encadenar condiciones con else if.
+
+Sintaxis:
+
+``` r
+if (condición1) {
+  # código si condición1 es TRUE
+} else if (condición2) {
+  # código si condición1 es FALSE y condición2 es TRUE
+} else {
+  # código si condición1 y condición2 son FALSE
+}
+
+```
+
+**Ejemplo**
+Queremos clasificar una nota en "Suspenso", "Aprobado", "Notable" o "Sobresaliente".
+
+```{r}
+nota <- 9
+
+if (nota >= 5) {
+  print("Aprobado")
+} else if (nota >= 7) {
+  print("Notable")
+} else if (nota >= 9) {
+  print("Sobresaliente")
+} else {
+  print("Suspenso")
+}
+
+```
+Con nota <- 9, ¿qué pasa?
+El programa imprime "Aprobado", aunque debería ser "Sobresaliente".
+¿Qué problema tiene este código? Las condiciones están mal ordenadas:
+  - La primera condición if (nota >= 5) ya se cumple para 9, por lo que se ejecuta y el resto de condiciones se ignoran.
+  - Nunca llega a comprobar si es "Notable" o "Sobresaliente".
+
+**Ejemplo corregido**
+La lógica correcta sería poner las condiciones de más restrictiva a menos restrictiva, o en orden adecuado:
+```{r}
+nota <- 9
+
+if (nota >= 9) {
+  print("Sobresaliente")
+} else if (nota >= 7) {
+  print("Notable")
+} else if (nota >= 5) {
+  print("Aprobado")
+} else {
+  print("Suspenso")
+}
+
+```
+
+Otra manera sería:
+
+```{r}
+nota <- 9
+if (nota < 5) {
+  print("Suspenso")
+} else if (nota < 7) {
+  print("Aprobado")
+} else if (nota < 9) {
+  print("Notable")
+} else {
+  print("Sobresaliente")
+}
+
+```
+
+
+¡Importante! Definir bien las condiciones lógicas y su orden.
+
+
+
+
+## Condicional vectorizado: `ifelse()`
+La función `ifelse()` se usa cuando queremos evaluar una condición sobre un vector completo. Esto significa que permite aplicar una condición sobre cada elemento de un vector y devolver un resultado distinto según sea verdadero (`TRUE`) o falso (`FALSE`). Es útil para crear nuevas columnas en data.frames.
+
+Sintaxis:
+```r
+ifelse(condición, valor_si_verdadero, valor_si_falso)
+```
+  * `condición` --> expresión lógica que devuelve `TRUE` o `FALSE` (puede ser un vector lógico).
+
+  * `valor_si_verdadero` --> lo que se devuelve en la posición donde la condición es `TRUE`.
+
+  * `valor_si_falso` --> lo que se devuelve en la posición donde la condición es `FALSE`.
+
+Ejemplo:
+```{r}
+edades <- c(12, 18, 25, 16)
+ifelse(edades >= 18, "Adulto", "Menor")
+# Resultado: "Menor" "Adulto" "Adulto" "Menor"
+
+```
+
+También se pueden anidar varios `ifelse()` para clasificar en más de dos categorías:
+```{r}
+nota <- c(4, 6, 8, 10, NA)
+
+clasificacion <- ifelse(is.na(nota), "Sin dato",
+                        ifelse(nota < 5, "Suspenso",
+                               ifelse(nota < 7, "Aprobado",
+                                      ifelse(nota < 9, "Notable", "Sobresaliente"))))
+
+clasificacion
+# "Suspenso" "Aprobado" "Notable" "Sobresaliente" "Sin dato"
+
+```
+
+
+
+::: {.callout-note}
+##  Ejercicios
+
+1. Escribe un programa que diga si un número almacenado en una variable `x` es positivo, negativo o cero.
+
+2. Crea una variable `edad` y escribe un condicional que muestre `'Jubilado'"'` si es `≥ 65`, y `'Menor'` si es `< 65`.
+
+3. Comprobar el estado del agua en base a su temperatura (sólido, líquido o gaseoso).
+
+4. Con un vector `v <- c(-3, 0, 5, -1, 2)`, usa `ifelse()` para crear otro vector que diga `'No negativo'` o `'Negativo'`.
+
+5. Usa `ifelse()` para clasificar un vector de edades en `'niño'` (menor de 12), `'adulto'` (12 a 64), `'mayor'` (65 o más).
+6. Escribe un programa que determine si un número es positivo par, positivo impar, negativo par, negativo impar o cero.
+7. Dados dos números `a` y `b`, escribe un programa que diga quién gana.
+8. Programa el juego piedra, papel o tijera.
+9. Con los datos penguins de la librería palmerpenguins:
+
+    9.1. Crea una columna isla2 tal que: Si island == "Dream" --> "Isla Sueño". En otro caso, deja el nombre original
+    
+    9.2. Crea una columna sexo2 que sea "Desconocido" si sex es NA y el valor original de sex en otro caso
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+# 1) Número positivo, negativo o cero
+x <- -3
+if (x > 0) {
+  print("Positivo")
+} else if (x < 0) {
+  print("Negativo")
+} else {
+  print("Cero")
+}
+
+# 2) Jubilado
+edad <- 70
+if (edad >= 65) {
+  print("Jubilado")
+} else {
+  print("No jubilado")
+}
+
+# 3) Estado sólido, líquido o gaseoso (agua)
+temp <- 90
+if (temp <= 0) {
+  print("Sólido")
+} else if (temp < 100) {
+  print("Líquido")
+} else {
+  print("Gaseoso")
+}
+
+# 4) Vector de negativos vs no negativos
+v <- c(-3, 0, 5, -1, 2)
+ifelse(v < 0, "Negativo", "No negativo")
+
+# 5) Clasificación de edades
+edades <- c(8, 20, 70, 15, 65)
+ifelse(edades < 12, "Niño",
+       ifelse(edades < 65, "Adulto", "Mayor"))
+
+# 6) Determinar si un número es "positivo par", "positivo impar", "negativo par", "negativo impar" o "cero"
+n <- 5
+if (n == 0) {
+  print("Cero")
+} else if (n > 0 & n %% 2 == 0) {
+  print("Positivo par")
+} else if (n > 0 & n %% 2 != 0) {
+  print("Positivo impar")
+} else if (n < 0 & n %% 2 == 0) {
+  print("Negativo par")
+} else {
+  print("Negativo impar")
+}
+
+# 7) Dado a y b, ¿quién gana?
+a <- 15
+b <- 20
+
+if (a > b) {
+  print("Gana A")
+} else if (a < b) {
+  print("Gana B")
+} else {
+  print("Empate")
+}
+
+# 8) 
+# Opciones posibles
+jugador1 <- "piedra"
+jugador2 <- "tijera"
+
+if (jugador1 == jugador2) {
+  print("Empate")
+} else if ((jugador1 == "piedra" & jugador2 == "tijera") |
+           (jugador1 == "tijera" & jugador2 == "papel") |
+           (jugador1 == "papel" & jugador2 == "piedra")) {
+  print("Gana Jugador 1")
+} else {
+  print("Gana Jugador 2")
+}
+
+# 9) Penguins
+library(palmerpenguins)
+data(penguins)
+
+# 9.1) 
+penguins$isla2 <- ifelse(penguins$island == "Dream",
+                         "Isla Sueño",
+                         penguins$island)
+
+# 9.2) 
+penguins$sexo2 <- ifelse(is.na(penguins$sex), "Desconocido", as.character(penguins$sex))
+
+
+```
+:::
+
+
