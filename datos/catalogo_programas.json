@@ -1,0 +1,35 @@
+[
+  {
+    "id_programa": "P001",
+    "nombre": "Transferencias para Bienestar Familiar",
+    "componentes": [
+      "Transferencia monetaria",
+      "Acompañamiento"
+    ],
+    "objetivo": "Reducir vulnerabilidad de hogares en pobreza extrema",
+    "poblacion_objetivo": "Hogares bajo línea de pobreza extrema",
+    "unidad_responsable": "SDSH"
+  },
+  {
+    "id_programa": "P002",
+    "nombre": "Mejoramiento de Vivienda",
+    "componentes": [
+      "Subsidio de materiales",
+      "Asesoría técnica"
+    ],
+    "objetivo": "Mejorar calidad estructural y sanitaria de viviendas",
+    "poblacion_objetivo": "Hogares con carencias de calidad y espacios",
+    "unidad_responsable": "SeDUV"
+  },
+  {
+    "id_programa": "P003",
+    "nombre": "Becas Educación Media Superior",
+    "componentes": [
+      "Apoyo mensual",
+      "Tutorías"
+    ],
+    "objetivo": "Reducir abandono escolar en EMS",
+    "poblacion_objetivo": "Estudiantes inscritos en EMS pública",
+    "unidad_responsable": "SEED"
+  }
+]
