@@ -1,0 +1,67 @@
+---
+title: "Tema 3 — Manejo de bases de datos (R)"
+lang: es
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    self-contained: true 
+execute:
+  echo: true
+  warning: false
+  message: false
+editor: source
+fontsize: 11pt
+---
+
+
+# ¿Qué veremos en cada subtema?
+
+  * 3.0 Lectura de datos: cómo importar datos desde csv, excel, etc., inspeccionarlos rápidamente y fijar opciones (encoding, separadores, valores perdidos), revisar cabeceras y fechas.
+
+  * 3.1 Limpieza: detección y tratamiento de datos faltantes, duplicados, outliers; corrección de tipos (numérico, fecha, factor), normalización de texto (acentos, mayúsculas/minúsculas).
+
+  * 3.2 Codificación: creación y recodificación de variables (dummies/factores), estandarización o discretización cuando corresponda, construcción de índices simples.
+
+  * 3.3 Análisis: estadísticas descriptivas, tablas y relaciones entre variables.
+
+  * 3.4 Selección: filtrado por condiciones, columnas, subpoblaciones; muestreo simple.
+
+  * 3.5 Visualización: gráficos básicos para monitoreo (tendencias, comparaciones entre grupos).
+
+  * 3.6 Ejemplos con librerías en R: flujos reproducibles con dplyr, readr/readxl, lubridate, ggplot2, etc.
+  
+**Lectura de datos**
+
+*Objetivo:* Saber importar datos correctamente y verificar que R ha interpretado bien tipos, encabezados y valores perdidos.
+
+El formato importa:
+
+  * separador (, ; \t), 
+  * encoding (UTF-8), 
+  * NA (valores especiales), 
+  * fechas (YYYY-MM-DD).
+
+Verificación rápida: tamaño, tipos de columnas, primeros registros, resumen.
+
+Ejemplos
+
+```{r}
+# CSV (separador coma, codificación UTF-8)
+library(readr)
+encuesta <- read_csv("datos/encuesta_beneficiarios.csv", locale = locale(encoding = "UTF-8"))
+
+# Excel
+library(readxl)
+padron <- read_excel("datos/padron_municipal.xlsx", sheet = "2024")
+
+# JSON (por ejemplo, catálogo)
+library(jsonlite)
+cat_programas <- fromJSON("datos/catalogo_programas.json")
+
+```
+
+
+
+
