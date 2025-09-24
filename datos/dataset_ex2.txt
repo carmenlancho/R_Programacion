@@ -1,0 +1,6 @@
+Nombre	Edad	Ciudad	Altura
+Ana	23	Madrid	1.65
+Luis	35	Cáceres	1.8
+Marta	29	Sevilla	1.7
+Carlos	40	Valencia	1.75
+Lucía	33	Badajoz	1.68
