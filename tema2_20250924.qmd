@@ -1,0 +1,124 @@
+---
+title: "Tema 2 — Programación en R"
+lang: es
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    self-contained: true 
+execute:
+  echo: true
+  warning: false
+  message: false
+editor: source
+fontsize: 11pt
+---
+
+
+# Manejo de librerías
+
+En R, las librerías (también llamadas paquetes) son conjuntos de funciones, datos y documentación creados por la comunidad o por R Core para ampliar las funcionalidades básicas de R.
+
+Son como “extensiones” del lenguaje: no vienen en el “núcleo” de R, pero puedes instalarlas y usarlas cuando las necesitas.
+
+Por ejemplo, para visualizaciones avanzadas, análisis de datos, modelos estadísticos, manipulación de tablas, etc.
+
+¿Qué nos permiten las librerías?
+
+* Ahorrar tiempo: en lugar de programar desde cero, usas funciones ya hechas.
+
+* Ampliar tus posibilidades: hay miles de paquetes en CRAN.
+
+* Compartir código reutilizable con otros.
+
+## Instalación y carga de librerías
+### Instalación
+```r
+install.packages("nombreDelPaquete")
+```
+Se necesita conexión a internet y se hace únicamente la primera vez en tu sistema.
+
+### Carga (activar la librería en la sesión actual)
+
+```r
+library(nombreDelPaquete)
+```
+ o
+ 
+ 
+```r
+require(nombreDelPaquete)
+```
+Esto se hace cada vez que abres R y quieres usar ese paquete. Si no lo cargas, las funciones del paquete no estarán disponibles.
+
+**Diferencia importante**
+
+  * `install.packages()` → descarga e instala (una vez).
+  * `library()` → carga en memoria (cada sesión).
+  
+Algunas librerías famosas de R son:
+
+  * `ggplot2`: visualización avanzada.
+
+  * `dplyr`: manipulación de datos.
+
+  * `tidyr`: transformación de datos.
+
+  * `readr`: lectura de archivos.
+
+  * `lubridate`: fechas y tiempos.
+
+  * `stringr`: manipulación de cadenas de texto.
+
+  * `palmerpenguins`: dataset de ejemplo de pingüinos.
+  
+Ejemplo:
+```{r}
+install.packages("ggplot2")  # solo 1 vez
+library(ggplot2)             # cada sesión
+
+# Ahora podemos usar sus funciones:
+qplot(mpg, wt, data = mtcars)
+
+```
+
+
+
+::: {.callout-note}
+##  Ejercicios
+
+1. Instala la librería `palmerpenguins`.
+
+2. Cárgala con `library()`.
+
+3. Muestra las primeras filas del dataset `penguins`.
+
+4. Instala y carga `dplyr`.
+
+5. Usa `?dplyr` o `help(package = "dplyr")` para ver su documentación.
+
+6. Aplica la función `glimpse(penguins)` para inspeccionar el dataset.
+
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+
+# 1,2,3
+install.packages("palmerpenguins")   # solo primera vez
+library(palmerpenguins)
+head(penguins)
+
+# 4,5,6
+install.packages("dplyr")   # solo primera vez
+library(dplyr)
+glimpse(penguins)
+
+```
+:::
+
+
+
