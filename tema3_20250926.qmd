@@ -136,10 +136,7 @@ library(lubridate)
 # - "2024-15-12"  -> "%Y-%d-%m"  (día-mes intercambiado en cadenas tipo "Y-d-m")
 
 # Armonizar formato de fecha
-encuesta$fecha_ok <- as.Date(
-  encuesta$fecha,
-  tryFormats = c("%Y-%m-%d", "%Y/%m/%d", "%d-%m-%Y", "%Y-%d-%m")
-)
+encuesta$fecha_ok <- encuesta$fecha_ok <- parse_date_time(encuesta$fecha,orders=c('ymd','y/m/d','dmy','mdy','ydm'))
 
 # Comprobar cuántas no se pudieron parsear:
 sum(is.na(encuesta$fecha_ok))
