@@ -1,0 +1,108 @@
+---
+title: "Tema 2 - Ejercicios"
+lang: es
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    self-contained: true 
+execute:
+  echo: true
+  warning: false
+  message: false
+editor: source
+fontsize: 11pt
+---
+
+# Ejercicio 1
+Construye:
+
+- Un vector numérico `v` de longitud 8 con números enteros.
+
+- Una lista `L` con tres elementos: el vector `v`, su media y sus valores al cuadrado.
+
+- Un factor `f` con niveles ("Bajo","Medio","Alto") asignando esos niveles a cada elemento de `v` según cortes que tú definas.
+
+- Muestra la tabla de frecuencias.
+
+
+
+
+# Ejercicio 2
+Escribe una función `clasificar_edad(x)` que reciba un número y devuelva:
+
+- "Joven" si $x \leq 29$
+
+- "Adulto" si $x \in [30,64]$
+
+- "Mayor" si $x \geq 65$
+
+- "ND" si x es NA o negativo.
+
+Prueba la función con distintos valores para verificar que es correcta. Muestra los resultados.
+
+
+
+# Ejercicio 3
+Programa un bucle `for` que calcule la suma de todos los múltiplos de 3 o 5 entre 1 y 200 (incluidos). Muestra la suma final.
+
+
+# Ejercicio 4
+```{r}
+v <- c(-5:5)
+res <- v[v != 0 & abs(v) >= 3]
+length_v <- length(res)
+sum_pos <- sum(res[res > 0])
+
+```
+ - Explica qué hace cada línea del código.
+
+ - ¿Cuánto vale `sum_pos`?
+ 
+# Ejercicio 5
+
+```{r}
+x <- c(-2, -1, 0, 1, 2, NA)
+y <- ifelse(is.na(x), "NA",
+            ifelse(x < 0, "neg",
+                   ifelse(x == 0, "cero", "pos")))
+
+```
+
+- ¿Cuál es el resultado final de `y`?
+- ¿Por qué la primera llamada a ifelse comprueba is.na(x)?
+
+
+# Ejercicio 6
+```{r}
+M <- matrix(1:12, nrow = 3, byrow = TRUE)
+cont <- 0
+for (i in 1:nrow(M)) {
+  for (j in 1:ncol(M)) {
+    if (M[i, j] %% 2 == 0){
+      cont <- cont + 1
+    } 
+  }
+}
+cont
+M
+```
+
+- ¿Cuántas iteraciones recorre `i`? ¿Y `j`?
+
+- ¿Cuánto vale `cont` al final?
+
+
+# Ejercicio 7: Carrera de tortuga y liebre
+Construye una función que, con un `while`, simule una carrera de $n=20$ pasos entre una tortuga y una liebre. Las condiciones son:
+
+ - La tortuga avanza 1 paso cada turno.
+
+ - La liebre avanza 2 pasos el 50% de las veces y 0 pasos el 50% restante.
+
+El bucle termina cuando uno llega a 20 o más.
+
+Muestra en qué turno ganó y quién fue el ganador.
+
+
