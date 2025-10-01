@@ -85,8 +85,8 @@ for (i in 1:nrow(M)) {
     } 
   }
 }
-cont
-M
+# cont
+# M
 ```
 
 - ¿Cuántas iteraciones recorre `i`? ¿Y `j`?
