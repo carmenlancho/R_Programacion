@@ -1,0 +1,1254 @@
+---
+title: "Tema 3 — Manejo de bases de datos (R)"
+lang: es
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    self-contained: true 
+execute:
+  echo: true
+  warning: false
+  message: false
+editor: source
+fontsize: 11pt
+---
+
+
+# ¿Qué veremos en cada subtema?
+
+  * 3.0 Lectura de datos: cómo importar datos desde csv, excel, etc., inspeccionarlos rápidamente y fijar opciones (encoding, separadores, valores perdidos), revisar cabeceras y fechas.
+
+  * 3.1 Limpieza: detección y tratamiento de datos faltantes, duplicados, outliers; corrección de tipos (numérico, fecha, factor), normalización de texto (acentos, mayúsculas/minúsculas).
+
+  * 3.2 Codificación: creación y recodificación de variables (dummies/factores), estandarización o discretización cuando corresponda, construcción de índices simples.
+
+  * 3.3 Análisis: estadísticas descriptivas, tablas y relaciones entre variables.
+
+  * 3.4 Selección: filtrado por condiciones, columnas, subpoblaciones; muestreo simple.
+
+  * 3.5 Visualización: gráficos básicos para monitoreo (tendencias, comparaciones entre grupos).
+
+  * 3.6 Ejemplos con librerías en R: flujos reproducibles con dplyr, readr/readxl, lubridate, ggplot2, etc.
+  
+**Lectura de datos**
+
+*Objetivo:* Saber importar datos correctamente y verificar que R ha interpretado bien tipos, encabezados y valores perdidos.
+
+El formato importa:
+
+  * separador (, ; \t), 
+  * encoding (UTF-8), 
+  * NA (valores especiales), 
+  * fechas (YYYY-MM-DD).
+
+Verificación rápida: tamaño, tipos de columnas, primeros registros, resumen.
+
+Ejemplos
+
+```{r}
+# CSV (separador coma, codificación UTF-8)
+library(readr)
+encuesta <- read_csv("datos/encuesta_beneficiarios.csv", locale = locale(encoding = "UTF-8"))
+
+# Excel
+library(readxl)
+padron <- read_excel("datos/padron_municipal.xlsx", sheet = "2024")
+
+# JSON (por ejemplo, catálogo)
+library(jsonlite)
+cat_programas <- fromJSON("datos/catalogo_programas.json")
+
+```
+
+
+
+
+
+
+# Limpieza
+
+Cuando nos enfrentamos a un conjunto de datos es importante revisar los datos para eliminar posibles errores o insconsistencias:
+
+  * Faltantes (NA): ¿faltó respuesta? ¿códigos especiales? Decidir: imputar, eliminar, o dejar según análisis.
+
+  * Duplicados: filas repetidas (registro, id).
+
+  * Tipos incorrectos: números leídos como texto; fechas mal parseadas --> resultados erróneos.
+
+  * Outliers: valores extremos (errores de captura o casos reales). Documentar criterios.
+
+  * Normalizar texto: acentos, espacios, mayúsculas/minúsculas, para unir/contar bien.
+
+
+**Caso de trabajo**
+
+Supongamos los siguientes datos provenientes de una encuesta:
+```{r}
+encuesta <- data.frame(
+  id = 1:12,
+  sexo = c("M", "F", "F", NA, "F", "M", "M", "F", "F", "Otro", "M", "F"),
+  edad = c(22, 35, NA, 29, 44, 19, 200, 61, 28, 37, 40, NA),   # 200 = outlier
+  ingreso_mensual = c(4500, 8000, NA, 5200, 300000, 0, 6200, 7000, 5900, NA, 4800, 5100), # 300000 outlier
+  municipio = c("León", "León", "Irapuato", "Celaya", "León", "Celaya",
+                "Irapuato", "Celaya", "León", "León", "Irapuato", "Celaya"),
+  fecha = c("2024-03-01","2024/03/05","2024-03-05","03-10-2024","2024-03-12",
+            "2024-03-12", "2024-15-12", NA, "2024-03-20","2024-03-22","2024-03-25","2024-03-25")
+)
+
+```
+
+
+**Datasets (incluidos en R)**
+
+  * USArrests: 50 estados y 4 variables de criminalidad (útil para ejemplos de NA/outliers si introducimos NA artificialmente y para escalado).
+
+  * airquality: tiene NA reales
+
+  * swiss: numérico/factores; socioeconómico clásico.
+  
+
+## Faltantes (NA) y duplicados
+
+```{r}
+# Conteo de NA por columna
+colSums(is.na(encuesta))
+
+# Eliminar filas completamente vacías (si existieran)
+encuesta <- encuesta[rowSums(is.na(encuesta)) < ncol(encuesta), ]
+
+# Duplicados por id
+sum(duplicated(encuesta$id))
+encuesta <- encuesta[!duplicated(encuesta$id), ]
+
+```
+
+## Tipos y fechas
+
+```{r}
+library(lubridate)
+
+# Varios formatos comunes en los datos:
+# - "2024-03-01"  -> "%Y-%m-%d"
+# - "2024/03/05"  -> "%Y/%m/%d"
+# - "03-10-2024"  -> "%d-%m-%Y"
+# - "2024-15-12"  -> "%Y-%d-%m"  (día-mes intercambiado en cadenas tipo "Y-d-m")
+
+# Armonizar formato de fecha
+encuesta$fecha_ok <- encuesta$fecha_ok <- parse_date_time(encuesta$fecha,orders=c('ymd','y/m/d','dmy','mdy','ydm'))
+
+# Comprobar cuántas no se pudieron parsear:
+sum(is.na(encuesta$fecha_ok))
+which(is.na(encuesta$fecha_ok))
+
+
+# Corregir valores imposibles a NA o revisarlos manualmente
+encuesta$edad <- ifelse(encuesta$edad < 0 | encuesta$edad > 110, NA, encuesta$edad)
+
+```
+
+
+## Outliers simples (reglas heurísticas)
+
+En evaluación real es necesario justificar umbrales
+
+```{r}
+# Por ingreso: marcar outliers por percentiles (p99)
+p99 <- quantile(encuesta$ingreso_mensual, 0.99, na.rm = TRUE)
+encuesta$ingreso_mensual <- ifelse(encuesta$ingreso_mensual > p99, 'NA', encuesta$ingreso_mensual) # NA no, nombrar
+
+```
+
+
+## Normalización de texto
+
+```{r}
+# Quitar espacios, pasar a minúsculas, quitar acentos con iconv
+encuesta$mun_norm <- tolower(trimws(encuesta$municipio))
+encuesta$mun_norm <- iconv(encuesta$mun_norm, from = "", to = "ASCII//TRANSLIT") # "leon" "leon" "leon" "irapuato" "celaya"
+
+```
+¿Qué hace cada función?
+
+## Imputación
+
+```{r}
+# Imputar ingreso_mensual
+encuesta$ingreso_mensual <- as.numeric(encuesta$ingreso_mensual)
+value_imputed <- data.frame(
+
+                original = encuesta$ingreso_mensual,
+                imputed_zero = replace(encuesta$ingreso_mensual, is.na(encuesta$ingreso_mensual), 0),
+                imputed_mean = replace(encuesta$ingreso_mensual, is.na(encuesta$ingreso_mensual), mean(encuesta$ingreso_mensual, na.rm = TRUE)))
+
+```
+
+
+NAs: 
+```{r}
+data("airquality")     # ozono, radiación solar, etc. en NY 1973
+aq <- airquality
+
+# 1) Faltantes
+colSums(is.na(aq))         # NA por columna
+which(is.na(aq$Ozone))     # posiciones con NA en Ozone
+
+# 2) Eliminar filas con demasiados NA (ejemplo: si todas las numéricas están NA)
+aq2 <- aq[rowSums(is.na(aq)) < ncol(aq), ]
+
+# 3) Rellenar NA con mediana de la columna (simple; documentar!)
+med_oz <- median(aq$Ozone, na.rm = TRUE)
+aq$Ozone_imp <- ifelse(is.na(aq$Ozone), med_oz, aq$Ozone)
+
+
+```
+
+
+Duplicados:
+```{r}
+df <- data.frame(id = c(1,2,2,3), x = c(10, 20, 20, 30))
+duplicated(df$id)       # TRUE en la segunda aparición
+df_nodup <- df[!duplicated(df$id), ]
+
+```
+
+
+::: {.callout-note}
+##  Ejercicios
+1.  Lee el conjunto de datos encuesta_beneficiarios_v2.
+2.  Cuenta NA por columna y por municipio, ¿qué variable tiene más faltantes?
+3.  Armoniza `fecha` y escribe cuántos registros quedaron sin fecha válida.
+
+4. Marca outliers de `edad` con regla edad > 100 y pásalos a NA.
+
+5. Estandariza `municipio` a minúsculas sin acentos, crea municipio_norm.
+6. Imputa `ingreso_mensual` por mediana dentro de municipio_norm y compara la distribución antes/después.
+7. Crea un `data.frame` con duplicados en id y elimina los registros repetidos conservando la primera aparición.
+
+8. Con `airquality`, cuenta NA por columna y reemplaza NA en `Solar.R` por la media.
+9. En `airquality`, 'cap' (recorta) `Ozone` al percentil 99 y compara `summary()` antes/después.
+
+
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+
+# 1) Leer conjunto de datos
+encuesta_v2 <- read.csv("datos/encuesta_beneficiarios_v2.csv",
+                        fileEncoding = "UTF-8",
+                        na.strings = c("", "NA"),
+                        stringsAsFactors = FALSE)
+head(encuesta_v2)
+
+# 2) 
+## NA por columna
+na_por_col <- colSums(is.na(encuesta_v2))
+na_por_col
+var_mas_NA <- names(which.max(na_por_col))
+cat("Variable con más NA:", var_mas_NA, "(", max(na_por_col), "NA )\n")
+
+## NA por municipio (cuenta de filas con al menos 1 NA)
+na_por_mpio <- tapply(rowSums(is.na(encuesta_v2)) > 0, encuesta_v2$municipio, sum)
+na_por_mpio
+
+# 3) 
+## Intentar varios formatos comunes:
+## - "YYYY-MM-DD"   (2024-03-01)
+## - "YYYY/MM/DD"   (2024/03/05)
+## - "DD-MM-YYYY"   (03-10-2024)  -> as.Date con formato "%d-%m-%Y"
+f1 <- as.Date(encuesta_v2$fecha, format = "%Y-%m-%d")
+f2 <- as.Date(encuesta_v2$fecha, format = "%Y/%m/%d")
+f3 <- as.Date(encuesta_v2$fecha, format = "%d-%m-%Y")
+
+## Tomar la primera que funcione por fila
+fecha_ok <- ifelse(!is.na(f1), f1,
+                   ifelse(!is.na(f2), f2,
+                          ifelse(!is.na(f3), f3, NA)))
+encuesta_v2$fecha_ok <- as.Date(fecha_ok, origin = "1970-01-01")
+
+## Cuántas quedaron sin fecha válida
+sum(is.na(encuesta_v2$fecha_ok))
+which(is.na(encuesta_v2$fecha_ok))
+
+
+# 4)
+encuesta_v2$edad_out_na <- ifelse(!is.na(encuesta_v2$edad) & encuesta_v2$edad > 100, NA, encuesta_v2$edad)
+table(is.na(encuesta_v2$edad), is.na(encuesta_v2$edad_out_na))
+
+# 5) 
+encuesta_v2$municipio_norm <- trimws(encuesta_v2$municipio)
+encuesta_v2$municipio_norm <- tolower(encuesta_v2$municipio_norm)
+encuesta_v2$municipio_norm <- iconv(encuesta_v2$municipio_norm, from = "", to = "ASCII//TRANSLIT")
+encuesta_v2$municipio_norm
+
+# 6)
+## Vector de medianas por municipio_norm (ignora NA)
+medianas_por_mun <- tapply(encuesta_v2$ingreso_mensual,
+                           encuesta_v2$municipio_norm,
+                           median, na.rm = TRUE)
+
+## Variable imputada
+encuesta_v2$ingreso_imp <- ifelse(
+  is.na(encuesta_v2$ingreso_mensual),
+  medianas_por_mun[as.character(encuesta_v2$municipio_norm)],
+  encuesta_v2$ingreso_mensual
+)
+
+## Comparar distribuciones
+summary(encuesta_v2$ingreso_mensual)
+summary(encuesta_v2$ingreso_imp)
+
+
+# 6) 
+
+duplicated(encuesta_v2)        # marca duplicados (TRUE a partir de la 2ª aparición)
+encuesta_v2_nodup <- encuesta_v2[!duplicated(encuesta_v2), ]  # conserva la primera aparición de cada obervacióm
+encuesta_v2_nodup
+
+
+# 7)
+data("airquality")
+aq <- airquality
+
+colSums(is.na(aq))  # NA por columna
+
+mean_solar <- mean(aq$Solar.R, na.rm = TRUE)
+aq$Solar.R_imp <- ifelse(is.na(aq$Solar.R), mean_solar, aq$Solar.R)
+
+## Verificación
+cbind(Original = colSums(is.na(airquality)),
+      ConImput = colSums(is.na(aq)))
+summary(aq$Solar.R)
+summary(aq$Solar.R_imp)
+
+# 8)
+## Crear versión imputada simple para no perder casos
+oz_imp <- ifelse(is.na(aq$Ozone), median(aq$Ozone, na.rm = TRUE), aq$Ozone)
+
+summary(aq$Ozone)   # original con NA
+summary(oz_imp)     # imputada por mediana
+
+
+
+
+```
+:::
+
+
+# Codificación
+
+Transformamos variables para análisis: recodificar categorías, crear dummies, agrupar rangos, estandarizar o construir índices sencillos:
+
+  * Recodificación: mapear categorías sueltas a valores coherentes (p. ej., "M/m/Masculino" --> "Masculino").
+
+  * Factores: variables categóricas con niveles ordenados (útil para modelos/tablas).
+
+  * Dummies: 0/1 para usar categorías en modelos/regresiones.
+
+  * Binning: pasar continuo a rangos (cuartiles, umbrales específicos).
+
+  * Estandarizar: poner variables en escalas comparables (media 0, sd 1) para construir índices.
+
+
+## Recodificación y factores
+
+Recodificar texto a categorías limpias:
+
+```{r}
+sexo_raw <- c("M", "F", "female", "Masculino", "Otro", NA, "m", "Femenino")
+sexo_rec <- ifelse(sexo_raw %in% c("F","Femenino","female","f"), "Femenino",
+                   ifelse(sexo_raw %in% c("M","Masculino","male","m"), "Masculino",
+                          "Otro"))
+sexo_fac <- factor(sexo_rec, levels = c("Femenino","Masculino","Otro"))
+table(sexo_fac, useNA = "ifany")
+
+```
+
+
+
+
+
+## Dummies (variables indicadoras)
+
+```{r}
+mujer <- as.integer(sexo_fac == "Femenino")   # 1 si Femenino, 0 si no
+# También lo podríamos hacer con ifelse
+
+```
+
+
+## Binning / categorías por rangos
+
+```{r}
+edad <- c(19, 25, 44, 65, 70, NA)
+tramo_edad <- cut(edad,
+                  breaks = c(-Inf, 29, 64, Inf),
+                  labels = c("Joven","Adulto","Mayor"),
+                  right = TRUE)
+tramo_edad
+
+```
+
+
+
+## Estandarización
+```{r}
+# Estandarizar ingreso_imp (media 0, sd 1)
+encuesta$ingreso_z <- scale(encuesta$ingreso_mensual)[,1]
+# z-score
+```
+
+## Índice simple (combinando componentes)
+Solo a modo ilustrativo, en proyectos reales es necesario justificar todas las decisiones.
+
+```{r}
+# Ejemplo: mayor ingreso (z) y menor edad (normalizada inversa)
+# normalizar edad a [0,1] ignorando NA
+rng <- range(encuesta$edad, na.rm = TRUE)
+edad_norm <- (max(encuesta$edad, na.rm = TRUE) - encuesta$edad) / diff(rng)   # mayor valor = más joven
+indice <- 0.7 * encuesta$ingreso_z + 0.3 * edad_norm
+indice
+# Un índice simple: ingreso_z y (edad invertida)
+```
+
+**Ejemplos**
+Con `USArrests` (criminalidad por estado)
+```{r}
+data("USArrests")
+ua <- USArrests
+# Crear categorías de "UrbanPop" (por terciles) y dummies (base)
+cortes_u <- quantile(ua$UrbanPop, c(0, 1/3, 2/3, 1), na.rm = TRUE)
+ua$UrbanCat <- cut(ua$UrbanPop, breaks = cortes_u, include.lowest = TRUE,
+                   labels = c("Baja","Media","Alta"))
+ua$UrbanAlta <- as.integer(ua$UrbanCat == "Alta")
+
+# Estandarizar tasas para un índice de 'riesgo' simple
+ua$Assault_z <- as.numeric(scale(ua$Assault))
+ua$Murder_z  <- as.numeric(scale(ua$Murder))
+ua$Rape_z    <- as.numeric(scale(ua$Rape))
+ua$Riesgo    <- 0.5 * ua$Assault_z + 0.3 * ua$Murder_z + 0.2 * ua$Rape_z
+head(ua)
+
+```
+
+
+
+
+::: {.callout-note}
+##  Ejercicios
+
+Con el conjunto de datos swiss, que se carga del siguiente modo:
+```{r}
+data("swiss")
+sw <- swiss
+```
+Realiza los siguientes ejercicios. No olvides que el primer paso siempre es echarle un vistazo a los datos.
+
+1. Clasificación de Fertilidad: Clasifica la variable Fertility en cuartiles ("Q1"..."Q4") y crea una variable FertAlta que valga 1 si el distrito está en el cuartil superior y 0 en caso contrario.
+
+2. Índice Educativo–Examen: Estandariza Education y Examination (z-score) y crea un índice combinado $IdxEduEx = 0.5*Education_z + 0.5*Examination_z$. Examina su distribución.
+
+3. Catolicidad en 3 grupos: Agrupa la variable Catholic en tres rangos ("Baja", "Media", "Alta") y crea una variable MayorCat que valga 1 si está en el grupo "Alta" y 0 en otro caso.
+
+4. Índice de Desventaja Infantil: Normaliza Infant.Mortality y Fertility en [0,1] (comienza creando una función que realice dicha normalización) y define $IdxDesvInf = 0.6*InfantMM + 0.4*FertMM$. Interpreta su summary().
+
+5. Rank y Top 5 Distritos: Calcula el ranking (1 = más alto) de `IdxDesvInf` y lista los 5 distritos con valores más altos. (Pista: `order()`).
+
+6. Cruce de variables: Cruza los cuartiles de Fertility con los 3 niveles de Catholic (CatCat) y muestra la tabla de contingencia.
+
+7. Alta Educación y Fertilidad: Crea EduAlta = 1 si Education está en el cuartil superior y compara la media de Fertility entre EduAlta=1 y EduAlta=0.
+
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+
+# Carga de datos
+data("swiss")
+sw <- swiss
+head(sw)
+str(sw)         # 47 distritos x 6 variables numéricas
+# Variables: Fertility, Agriculture, Examination, Education, Catholic, Infant.Mortality
+
+# 1) 
+cortes_f <- quantile(sw$Fertility, probs = c(0,0.25,0.5,0.75,1), na.rm = TRUE)
+sw$Fert_quart <- cut(sw$Fertility, breaks = cortes_f, include.lowest = TRUE,
+                     labels = c("Q1","Q2","Q3","Q4"), ordered_result = TRUE)
+sw$FertAlta <- as.integer(sw$Fert_quart == "Q4")
+table(sw$Fert_quart)
+head(sw[, c("Fertility","Fert_quart","FertAlta")])
+
+
+# 2)
+sw$Education_z <- as.numeric(scale(sw$Education))
+sw$Examination_z <- as.numeric(scale(sw$Examination))
+sw$IdxEduEx <- 0.5*sw$Education_z + 0.5*sw$Examination_z
+summary(sw$IdxEduEx)
+
+
+# 3)
+sw$CatCat <- cut(sw$Catholic,
+                 breaks = c(-Inf, 33.3, 66.6, Inf),
+                 labels = c("Baja","Media","Alta"),
+                 right = TRUE)
+sw$MayorCat <- as.integer(sw$CatCat == "Alta")
+table(sw$CatCat)
+head(sw[, c("Catholic","CatCat","MayorCat")])
+
+
+# 4)
+norm_minmax <- function(v) (v - min(v, na.rm=TRUE)) / diff(range(v, na.rm=TRUE))
+InfantMM <- norm_minmax(sw$Infant.Mortality)
+FertMM   <- norm_minmax(sw$Fertility)
+sw$IdxDesvInf <- 0.6*InfantMM + 0.4*FertMM
+summary(sw$IdxDesvInf)
+# Justificación: mayor peso a mortalidad infantil por su gravedad en políticas de salud.
+
+
+# 5)
+ord <- order(sw$IdxDesvInf, decreasing = TRUE)
+top5 <- ord[1:5]
+sw[top5, c("Fertility","Infant.Mortality","IdxDesvInf")]
+
+
+# 6)
+tab <- table(sw$Fert_quart, sw$CatCat)
+tab
+prop.table(tab, margin = 2)   # proporciones por columna (opcional)
+
+
+
+# 7)
+cortes_ed <- quantile(sw$Education, probs = c(0,.25,.5,.75,1), na.rm = TRUE)
+sw$Edu_quart <- cut(sw$Education, breaks = cortes_ed, include.lowest = TRUE,
+                    labels = c("Q1","Q2","Q3","Q4"), ordered_result = TRUE)
+sw$EduAlta <- as.integer(sw$Edu_quart == "Q4")
+
+tapply(sw$Fertility, sw$EduAlta, mean, na.rm = TRUE)
+
+```
+:::
+
+
+
+# Análisis
+Es el primer diagnóstico cuantitativo de un conjunto de datos: entender magnitudes, dispersiones, relaciones, y diferencias entre grupos. Antes de modelar o graficar, necesitamos saber qué hay, cómo se distribuye y dónde están los problemas (NA, atípicos, unidades, etc.).
+
+**Objetivos:**
+
+- Resumir variables numéricas (medias, medianas, cuartiles, rangos).
+- Contar y cruzar variables categóricas (tablas de frecuencias y proporciones).
+- Medir relaciones básicas (correlaciones, covarianzas).
+- Comparar entre grupos (por mes, por municipio, por tramo de edad,...).
+
+**Ideas clave (con R base):**
+
+- Resúmenes rápidos: `summary(x)` muestra mínimo, cuartiles, mediana y máximo en el caso de variables cuantitativas, y muestra cantidad de valores por cada categoría en el caso de variables cualitativas.
+
+- Medidas puntuales: `mean(x, na.rm=TRUE)`, `sd()`, `median()`, `quantile()`.
+    - Tip: la mediana es más robusta a atípicos que la media.
+
+- Tablas categóricas: `table(g)`, y proporciones con `prop.table(table(g))`.
+   - Por margen: prop.table(tabla, margin = 1) (por fila) o margin = 2 (por columna).
+
+- Por grupo:
+  - `tapply(x, g, FUN)` → aplica `FUN` a `x` dentro de cada grupo `g`.
+  - `aggregate(y ~ g1 + g2, data=df, FUN)` --> resúmenes por múltiples grupos.
+
+- Relaciones:
+   - `cor(x, y, use="complete.obs")` --> relación lineal entre variables.
+   - Interpretación: valores cercano a 1 o -1 = relación lineal fuerte; cerca de 0 = débil o no lineal.
+   - Ignora NAs por defecto.
+
+- Top-N / ranking:
+   - `order(x, decreasing=TRUE)` da el índice para reordenar el data frame y ver los 'top'.
+   - `which.max(x)` / `which.min(x)` señala máximos y mínimos.
+
+- NA importan: Muchos fallos vienen de olvidar `na.rm=TRUE`. Úsalo en todas las funciones que lo admiten si hay NA.
+
+
+**Ejemplos**
+
+¿Cómo cambia el Ozono por mes?
+```{r}
+tapply(aq$Ozone, aq$Month, mean, na.rm=TRUE)
+```
+
+
+¿Cómo de relacionados están Murder y Assault?
+```{r}
+cor(ua$Murder, ua$Assault)
+```
+
+
+¿Cuál es el top 5 de Fertility?
+```{r}
+swiss[order(swiss$Fertility, decreasing=TRUE), ][1:5, ]
+```
+
+
+¿Cuáles son los 15 días con Ozone más alto?
+```{r}
+idx <- order(aq$Ozone, decreasing = TRUE, na.last = NA)[1:15]
+aq[idx, c("Ozone","Solar.R","Temp","Month","Day")]
+```
+
+Categoriza la variable edad de encuesta_v2 y crúzala con la variable sexo.
+```{r}
+encuesta_v2$tramo_edad <- cut(encuesta_v2$edad, c(-Inf,29,64,Inf), labels = c("Joven","Adulto","Mayor"))
+table(encuesta_v2$tramo_edad, encuesta_v2$sexo, useNA = "ifany")
+```
+
+```{r}
+normalizar_texto <- function(x) {
+  y <- trimws(x)
+  z <- iconv(y, from = "", to = "ASCII//TRANSLIT")
+  tolower(ifelse(is.na(z), y, z))
+}
+sexo_norm <- normalizar_texto(encuesta_v2$sexo)
+
+fem <- c("f","femenino","female","mujer")
+mas <- c("m","masculino","male","hombre")
+
+sexo_rec <- ifelse(sexo_norm %in% fem, "Femenino",
+             ifelse(sexo_norm %in% mas, "Masculino", "Otro/ND"))
+
+encuesta_v2$sexo_rec <- factor(sexo_rec, levels = c("Femenino","Masculino","Otro/ND"))
+table(encuesta_v2$tramo_edad, encuesta_v2$sexo_rec, useNA = "ifany")
+```
+
+
+
+# Selección
+
+Consiste en extraer subconjuntos del data frame: filas que cumplen condiciones, columnas relevantes, ordenar, eliminar duplicados, y muestrear. Sin seleccionar bien, cualquier análisis puede mezclar peras con manzanas.
+
+**Objetivos**
+
+- Elegir filas por condiciones lógicas: "ingreso > 7000 y edad $\in [30,64]$".
+
+- Elegir columnas por nombre, posición, etc.
+
+- Ordenar para ver top/bottom y preparar tablas.
+
+- Obtener muestras.
+
+- Quitar duplicados o quedarnos con "el más reciente".
+
+**Ideas clave (R base)**
+
+ - Filtrado de filas con corchetes: `df[condicion, ]`.
+     - Combina condiciones con `&` (y), `|` (o), `!` (no). ¡Usa paréntesis para asegurar!
+
+ - Selección de columnas: `df[, c("col1","col2")]` o por patrón `grep("patron", names(df))`.
+
+ - Ordenación: `df[order(df$var, decreasing=TRUE), ]`.
+
+ - Duplicados:
+    - `duplicated(df$id)` marca TRUE a partir de la segunda vez que aparece ese id.
+    - `df[!duplicated(df$id), ]` conserva la primera aparición.
+
+- Muestreo. Simple: `df[sample.int(nrow(df), k), ]`.
+
+**Ejemplos**
+Filas con Ozone > 100 y Solar.R no NA.
+```{r}
+aq[aq$Ozone > 100 & !is.na(aq$Solar.R), ]
+```
+Columnas que contienen "a" en el nombre:
+```{r}
+aqa <- aq[, grep("a", names(aq))]
+```
+Top 10 Temp más altas (con su fecha)
+```{r}
+topT <- aq[order(aq$Temp, decreasing = TRUE), ][1:10, c("Temp","Month","Day")]
+topT
+```
+
+
+Estados con UrbanPop en Q3/Q4 y Assault > mediana
+
+```{r}
+ua <- USArrests
+medA <- median(ua$Assault)
+sel  <- ua$UrbanPop >= quantile(ua$UrbanPop, 0.5) & ua$Assault > medA
+ua_sel <- rownames(ua[sel, ])
+ua_sel
+```
+
+Distritos con Catholic > 66 y Fertility por encima de Q3
+```{r}
+sw <- swiss
+sel <- sw$Catholic > 66 & sw$Fertility > quantile(sw$Fertility, .75)
+sw_sel <- sw[sel, ]
+sw_sel
+```
+
+
+Subpoblación: beneficiarios con ingreso > 7000 y edad 30–64
+```{r}
+encuesta_v2 <- read.csv("datos/encuesta_beneficiarios_v2.csv")
+
+sub_ben <- subset(encuesta_v2, beneficiario == 1 & ingreso_mensual > 7000 & edad >= 30 & edad <= 64)
+sub_ben
+```
+Con los datos swiss, categoriza la variable Catholic. Después, para cada categoría, calcula la correlación Fertility ~ Education.
+```{r}
+data("swiss")
+sw <- swiss
+
+med_cat <- median(sw$Catholic, na.rm = TRUE)
+grupo <- ifelse(sw$Catholic <= med_cat, "Baja", "Alta")
+
+# Correlaciones por grupo
+c_baja <- cor(sw$Fertility[grupo=="Baja"], sw$Education[grupo=="Baja"])
+c_alta <- cor(sw$Fertility[grupo=="Alta"],        sw$Education[grupo=="Alta"])
+c_baja
+c_alta
+
+```
+
+
+Summary de Infant.Mortality cuando la fertilidad es mayor que su cuartil q4 y la educación está en su cuartil Q1.
+```{r}
+sw <- swiss
+
+# Cuartiles
+qF <- quantile(sw$Fertility, c(0,.25,.5,.75,1), na.rm = TRUE)
+qE <- quantile(sw$Education, c(0,.25,.5,.75,1), na.rm = TRUE)
+
+sel <- sw$Fertility >= qF[4] & sw$Education <= qE[2]  # Q4 Fertility y Q1 Education
+summary(sw[sel, 'Infant.Mortality'])
+```
+
+
+# Visualización
+
+Un gráfico debe responder una pregunta. Debemos, por tanto, escoger el tipo de gráfico según el tipo de variable y la comparación deseada.
+
+Algunos gráficos clásicos son:
+
+- Categórica --> Frecuencias: `barplot()` (barras).
+
+- Numérica --> Distribución: `hist()` (histograma), `boxplot()` (caja y bigotes).
+
+- Numérica vs numérica --> Relación: `plot()` (dispersión), con `abline()` para tendencias simples.
+
+- Grupos: barras agrupadas (`barplot(..., beside=TRUE)`), boxplots por grupo (`boxplot(y ~ g)`).
+
+
+Algunas personalizaciones:
+
+- Títulos y ejes: `main=`, `xlab=`, `ylab=`.
+
+- Rango de ejes: `xlim=`, `ylim=`.
+
+- Simbología: `pch` (forma del punto), `cex` (tamaño), `lwd` (grosor), `lty` (tipo de línea).
+
+- Colores básicos: `col=` (usa nombres 'red', 'steelblue', etc., o índices).
+
+- Leyendas: `legend("topleft", legend=, col=, pch=, lwd=)`.
+
+
+Otras opciones interesantes:
+
+- Multipanel: `par(mfrow=c(filas, cols))` para poner varios gráficos en una misma ventana (recuerda devolver luego par(op)).
+
+- Guardar imágenes: `png("archivo.png", width=1200, height=800, res=150)`.
+
+
+## Ejemplos
+
+### Barras
+
+**Frecuencias simples**
+
+```{r}
+# Categorizamos Temp en airquality
+aq$Temp_cat <- cut(aq$Temp, breaks = c(-Inf, 75, 85, Inf),
+                   labels = c("Fresca","Templada","Calurosa"))
+freq <- table(aq$Temp_cat)
+
+barplot(freq,
+        main = "Temperatura",
+        xlab = "Categoría", ylab = "Frecuencia",
+        col = "lightblue")
+
+```
+
+**Barras agrupadas/apiladas**
+
+```{r}
+aq$Month <- as.factor(aq$Month)
+# Cruce Mes × Categoría de Temp
+tab <- table(aq$Month, aq$Temp_cat)
+
+par(mfrow = c(1, 2))
+barplot(tab, beside = TRUE,
+        main = "Barras agrupadas",
+        xlab = "Mes", ylab = "Frecuencia",
+        col = c("skyblue","gold","salmon","lightgreen",'gray'))
+legend("topright", legend = rownames(tab),
+       fill = c("skyblue","gold","salmon","lightgreen",'gray'))
+
+barplot(tab, beside = FALSE,
+        main = "Barras apiladas",
+        xlab = "Mes", ylab = "Frecuencia",
+        col = c("skyblue","gold","salmon","lightgreen",'gray'))
+par(mfrow = c(1, 1))
+
+```
+
+### Dispersión/línea
+**Relación de dos variables numéricas**
+```{r}
+# USArrests: Assault vs. UrbanPop
+plot(ua$UrbanPop, ua$Assault,
+     main = "Assault vs UrbanPop",
+     xlab = "UrbanPop (%)", ylab = "Assault (tasa)",
+     pch = 19, col = "steelblue")
+
+# Recta de regresión (mínimos cuadrados)
+mod <- lm(Assault ~ UrbanPop, data = ua)
+abline(mod, col = "red", lwd = 2)
+
+```
+
+
+**Serie simple con línea**
+```{r}
+# airquality: Ozone a lo largo de los días (filtramos NA)
+ok <- complete.cases(aq$Ozone)
+plot(aq$Ozone[ok], type = "o",
+     main = "Ozone por orden temporal (observaciones válidas)",
+     xlab = "Índice (día con dato)", ylab = "Ozone",
+     pch = 16, col = "darkgreen")
+
+```
+
+
+
+**Varias series a la vez**
+
+```{r}
+# swiss: dibujamos varias columnas escaladas
+S <- scale(sw[, c("Fertility","Education","Infant.Mortality")])
+matplot(S, type = "l", lty = 1:3, lwd = 2,
+        main = "Varias series escaladas (swiss)",
+        xlab = "Distrito (índice)", ylab = "Z-score")
+legend("topleft", legend = c("Fertility","Education","Infant.Mortality"),
+       col = 1:3, lty = 1:3, lwd = 2, bty = "n")
+
+```
+
+### Histogramas
+**Distribución de una variable numérica**
+```{r}
+hist(aq$Ozone,
+     main = "Distribución de Ozone",
+     xlab = "Ozone", ylab = "Frecuencia",
+     col = "khaki", breaks = 12)
+abline(v = median(aq$Ozone, na.rm = TRUE), col = "red", lwd = 2, lty = 2)
+
+```
+
+### Diagrama de cajas y bigotes (boxplot)
+**Una variable**
+```{r}
+boxplot(ua$Assault,
+        main = "Boxplot de Assault",
+        ylab = "Assault",
+        col = "lavender")
+
+```
+
+
+**Por grupos**
+```{r}
+# swiss: Fertility por terciles de Education
+qE <- quantile(sw$Education, c(0, 1/3, 2/3, 1))
+sw$Edu_terc <- cut(sw$Education, qE, include.lowest = TRUE, labels = c("Baja","Media","Alta"))
+
+boxplot(Fertility ~ Edu_terc, data = sw,
+        main = "Fertility por terciles de Education",
+        xlab = "Education", ylab = "Fertility",
+        col = c("lightblue","lightsalmon","lightgreen"))
+
+```
+
+## Guardar archivo
+```{r}
+png("mi_grafico.png", width=1200, height=900, res=150)
+plot(ua$UrbanPop, ua$Assault, main="Guardado a PNG")
+dev.off()
+
+```
+La función `dev.off()` sirve para cerrar el dispositivo gráfico que hemos elegido, de este modo se creará un archivo y podremos crear más gráficos después.
+
+
+
+::: {.callout-note}
+##  Ejercicios
+1) Calcula los 5 estados con mayor Assault y dibuja un barplot() ordenado (de mayor a menor), con eje y etiquetado y nombres de estados en el eje x (dataset USArrests).
+
+2) Diagrama de dispersión de Temp y Ozone (dataset airquality).
+
+3) En un panel 2×2, dibuja histogramas de Ozone para todos los meses.
+
+4) Crea terciles de Catholic y dibuja boxplot(Fertility ~ tercil) (dataset swiss).
+
+5) Divide UrbanPop en terciles y colorea el scatter Assault vs Murder por tercil. Añade leyenda (dataset USArrests).
+
+6) Grafica Temp como serie (orden natural de filas) con type="o", y marca con líneas horizontales la media y la mediana (dataset airquality).
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+# 1) 
+ua <- USArrests
+ord <- order(ua$Assault, decreasing = TRUE)
+top5 <- ua[ord[1:5], "Assault"]
+barplot(top5,
+        main = "Top-5 Assault (USArrests)",
+        ylab = "Assault", xlab = " ",
+        col = "tomato")
+axis(1, at = seq_along(top5), labels = rownames(ua)[ord[1:5]], las = 2, tick = FALSE)
+
+# 2)
+aq <- airquality
+ok <- complete.cases(aq[, c("Ozone","Temp")])
+plot(aq$Temp[ok], aq$Ozone[ok],
+     main = "Ozone vs Temp", xlab = "Temp", ylab = "Ozone",
+     pch = 19, col = "dodgerblue")
+
+
+# 3) 
+op <- par(mfrow = c(2,2), mar = c(4,4,2,1))
+for (m in 5:8) {
+  sel <- aq$Month == m & !is.na(aq$Ozone)
+  hist(aq$Ozone[sel],
+       main = paste("Ozone - Mes", m),
+       xlab = "Ozone",
+       col = "gold", breaks = 10)
+}
+par(op)
+
+# 4) 
+sw <- swiss
+qC <- quantile(sw$Catholic, c(0, 1/3, 2/3, 1))
+sw$Cat_terc <- cut(sw$Catholic, qC, include.lowest = TRUE,
+                   labels = c("Baja","Media","Alta"))
+boxplot(Fertility ~ Cat_terc, data = sw,
+        main = "Fertility por terciles de Catholic",
+        xlab = "Catholic (tercil)", ylab = "Fertility",
+        col = c("lightblue","tan1","pink"))
+
+# 5)
+cuts <- quantile(ua$UrbanPop, c(0,1/3,2/3,1))
+ua$UrbanCat <- cut(ua$UrbanPop, cuts, include.lowest = TRUE, labels = c("Baja","Media","Alta"))
+cols <- c("darkgreen","orange","red")[ua$UrbanCat]
+formas <- c(19,22,21)[ua$UrbanCat]
+
+plot(ua$Murder, ua$Assault,
+     main = "Assault vs Murder por tercil de UrbanPop",
+     xlab = "Murder", ylab = "Assault",
+     pch = formas, col = cols)
+legend("topleft", legend = levels(ua$UrbanCat),
+       col = c("darkgreen","orange","red"), pch = c(19,2,21), bty = "n")
+
+
+# 6)
+plot(aq$Temp, type = "o",
+     main = "Serie de Temp con media/mediana",
+     xlab = "Índice", ylab = "Temp",
+     pch = 16, col = "darkblue")
+abline(h = mean(aq$Temp, na.rm = TRUE), col = "red", lwd = 2, lty = 2)
+abline(h = median(aq$Temp, na.rm = TRUE), col = "springgreen4", lwd = 2, lty = 3)
+# Leyenda
+legend("topleft",
+       legend = c("Temp (serie)", "Media", "Mediana"),
+       col    = c("darkblue", "red", "springgreen4"),
+       lty    = c(1, 2, 3),
+       lwd    = c(1, 2, 2),
+       pch    = c(16, NA, NA),   # punto para la serie, sin símbolo para líneas
+       pt.cex = 1,
+       bty    = "n")             # sin caja
+
+
+
+
+```
+:::
+
+
+# Ejemplos en librerías de R
+
+Hasta ahora, nos hemos centrado principalmente en R base. No obstante, R cuenta con diversas librerías de gran utilidad para el análisis de datos. En esta sección nos centraremos en las librerías `dplyr` y `ggplot`. Iremos mostrando distintos ejemplos de las diferentes secciones abordadas en este tema.
+
+
+**Carga de librerías y lectura de datos**
+```{r}
+# Instala si hace falta:
+# install.packages(c("tidyverse", "palmerpenguins"))
+
+library(dplyr)
+library(ggplot2)
+theme_set(theme_minimal())  # estética limpia por defecto
+
+# Datasets base
+data("airquality"); aq <- airquality
+data("USArrests");  ua <- USArrests %>% tibble::rownames_to_column("state")
+data("swiss");      sw <- swiss        %>% tibble::rownames_to_column("district")
+
+# Nuestro CSV (ajusta ruta si procede)
+encuesta_v2 <- read.csv("datos/encuesta_beneficiarios_v2.csv",
+                        fileEncoding = "UTF-8", na.strings = c("", "NA"))
+
+```
+
+
+## Selección de columnas y filas con `select`, `filter`y `arrange`.
+```{r}
+# Filtrar y ordenar
+aq_clean <- aq %>%
+  filter(!is.na(Ozone), !is.na(Solar.R)) %>%     # filas completas en variables clave
+  select(Ozone, Solar.R, Temp, Month, Day) %>%   # columnas de interés
+  arrange(desc(Ozone))                            # ordena por Ozone desc
+
+head(aq_clean, 5)
+
+```
+
+
+```{r}
+# Top 5 estados por Assault
+ua_top5 <- ua %>%
+  arrange(desc(Assault)) %>%
+  slice_head(n = 5) %>%
+  select(state, Assault, UrbanPop)
+
+ua_top5
+
+```
+
+
+
+
+
+## Transformaciones (mutate, case_when, factor, recodificación)
+
+```{r}
+# Creación de categorías de temperatura y conversión a factor ordenado
+aq2 <- aq %>%
+  mutate(
+    Temp_cat = cut(Temp, breaks = c(-Inf, 75, 85, Inf),
+                   labels = c("Fresca","Templada","Calurosa"),
+                   ordered_result = TRUE)
+  )
+aq2
+```
+
+
+```{r}
+# Creación de terciles de la variable Education
+sw2 <- sw %>%
+  mutate(
+    qE1 = quantile(Education, 1/3, na.rm = TRUE),
+    qE2 = quantile(Education, 2/3, na.rm = TRUE),
+    Edu_terc = case_when(
+      Education <= qE1 ~ "Baja",
+      Education <= qE2 ~ "Media",
+      TRUE             ~ "Alta"
+    ) %>% factor(levels = c("Baja","Media","Alta"))
+  ) %>%
+  select(-qE1, -qE2)
+sw2
+```
+
+
+```{r}
+# Normalizar texto en municipio
+# Categorizar edad
+# Homogeneizar categorías en sexo
+
+normalizar_texto <- function(x) {
+  y <- trimws(x); z <- iconv(y, "", "ASCII//TRANSLIT")
+  tolower(ifelse(is.na(z), y, z))
+}
+
+encuesta2 <- encuesta_v2 %>%
+  mutate(
+    municipio_norm = normalizar_texto(municipio),
+    tramo_edad = cut(edad, c(-Inf, 29, 64, Inf),
+                     labels = c("Joven","Adulto","Mayor"),
+                     ordered_result = TRUE),
+    sexo_rec = case_when(
+      sexo %in% c("F","Femenino","f","female","Mujer") ~ "Femenino",
+      sexo %in% c("M","Masculino","m","male","Hombre") ~ "Masculino",
+      TRUE ~ "Otro/ND"
+    ) %>% factor(levels = c("Femenino","Masculino","Otro/ND"))
+  )
+encuesta2
+```
+
+## Resúmenes por grupo (group_by / summarise)
+
+```{r}
+# Medianza de ozono en cada categoría de Temperatura categorizada
+aq2 %>%
+  group_by(Temp_cat) %>%
+  summarise(med_Ozone = median(Ozone, na.rm = TRUE),
+            n = n()) # número de observaciones
+
+```
+
+
+```{r}
+# Cálculo de índice (nueva variable)
+# Tabla por categorías de UrbanCat
+ua2 <- ua %>%
+  mutate(
+    Assault_z = scale(Assault) %>% as.numeric(), # escalar variable
+    Murder_z  = scale(Murder)  %>% as.numeric(), # escalar variable
+    Idx       = 0.6*Assault_z + 0.4*Murder_z, # creación de nueva variable
+    UrbanCat  = cut(UrbanPop, # categorización de UrbanPop
+                    quantile(UrbanPop, c(0, 1/3, 2/3, 1), na.rm = TRUE),
+                    include.lowest = TRUE,
+                    labels = c("Baja","Media","Alta"))
+  )
+
+ua2 %>% count(UrbanCat) # Tabla de frecuencias
+
+```
+
+
+```{r}
+# Ingreso medio y mediano por municipio
+encuesta2 %>%
+  group_by(municipio_norm) %>%
+  summarise(
+    media_ingreso  = mean(ingreso_mensual, na.rm = TRUE),
+    mediana_ingreso= median(ingreso_mensual, na.rm = TRUE),
+    n = n()
+  ) %>%
+  arrange(desc(mediana_ingreso))
+
+
+```
+
+## Visualización con ggplot2
+**Gráfico de barras**
+```{r}
+# Barras: top-5 Assault
+ua_top5 %>%
+  mutate(state = reorder(state, Assault)) %>%
+  ggplot(aes(x = state, y = Assault)) +
+  geom_col(fill = "tomato") +
+  coord_flip() +
+  labs(title = "Top-5 Assault (USArrests)",
+       x = "Estado", y = "Assault")
+
+```
+
+**Gráfico de barras apiladas**
+```{r}
+aq2 %>%
+  filter(!is.na(Temp_cat)) %>%
+  count(Month, Temp_cat) %>%
+  ggplot(aes(x = factor(Month), y = n, fill = Temp_cat)) +
+  geom_col() +
+  labs(title = "Categorías de Temp por Mes",
+       x = "Mes", y = "Frecuencia", fill = "Temp_cat")
+
+```
+
+**Gráfico de barras agrupadas**
+```{r}
+aq2 %>%
+  filter(!is.na(Temp_cat)) %>%
+  count(Month, Temp_cat) %>%
+  ggplot(aes(x = factor(Month), y = n, fill = Temp_cat)) +
+  geom_col(position = position_dodge(width = 0.9)) +
+  labs(title = "Categorías de Temp por Mes",
+       x = "Mes", y = "Frecuencia", fill = "Temp_cat")
+
+```
+
+**Gráfico de dispersión con línea de tendencia**
+```{r warning=FALSE, message=FALSE}
+aq %>%
+  filter(!is.na(Ozone), !is.na(Temp)) %>%
+  ggplot(aes(x = Temp, y = Ozone)) +
+  geom_point(alpha = 0.7, color = "dodgerblue") +
+  geom_smooth(method = "lm", color = "red") +
+  labs(title = "Ozone vs Temp (airquality)",
+       x = "Temp", y = "Ozone")
+
+```
+
+**Gráfico de dispersión coloreando por categoría**
+```{r}
+ua2 %>%
+  ggplot(aes(x = Murder, y = Assault, color = UrbanCat)) +
+  geom_point(size = 2, alpha = 0.8) +
+  labs(title = "Assault vs Murder por tercil de UrbanPop",
+       x = "Murder", y = "Assault", color = "UrbanPop")
+
+```
+
+
+
+**Histograma**
+```{r}
+aq %>%
+  ggplot(aes(x = Ozone)) +
+  geom_histogram(binwidth = 10, fill = "gold", color = "grey20", na.rm = TRUE) +
+  labs(title = "Distribución de Ozone", x = "Ozone", y = "Frecuencia")
+
+```
+**Histograma por grupos**
+```{r}
+aq %>%
+  filter(Month %in% 5:8) %>%
+  ggplot(aes(x = Ozone)) +
+  geom_histogram(binwidth = 10, fill = "maroon", color = "grey30", na.rm = TRUE) +
+  facet_wrap(~ Month, ncol = 2) +
+  labs(title = "Ozone por mes (5–8)")
+
+```
+
+
+**Boxplot**
+```{r}
+sw2 %>%
+  ggplot(aes(x = Edu_terc, y = Fertility, fill = Edu_terc)) +
+  geom_boxplot(alpha = 0.8, show.legend = FALSE) +
+  geom_jitter(width = 0.2, alpha = 0.6) + # añade los puntitos
+  labs(title = "Fertility por terciles de Education",
+       x = "Education (tercil)", y = "Fertility")
+
+```
+
+**Serie temporal**
+```{r}
+aq %>%
+  mutate(idx = row_number()) %>%
+  ggplot(aes(x = idx, y = Temp)) +
+  geom_line() +
+  geom_point(size = 1.2) +
+  geom_hline(yintercept = mean(aq$Temp, na.rm = TRUE), linetype = 2, color = "red") +
+  geom_hline(yintercept = median(aq$Temp, na.rm = TRUE), linetype = 3, color = "springgreen4") +
+  labs(title = "Temperatura con media y mediana",
+       x = "Índice", y = "Temp")
+
+```
+
+
