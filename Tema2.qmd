@@ -1,0 +1,2248 @@
+---
+title: "Tema 2 — Programación en R"
+lang: es
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    self-contained: true 
+execute:
+  echo: true
+  warning: false
+  message: false
+editor: source
+fontsize: 11pt
+---
+
+# R
+
+## ¿R?
+
+**R** es un **lenguaje de programación** y un **entorno de software** diseñado específicamente para el análisis estadístico, la manipulación de datos y la visualización gráfica. Es un **software libre y de código abierto**, distribuido bajo la licencia **GNU GPL**, lo que significa que cualquiera puede usarlo, modificarlo y compartirlo sin costo.
+
+Algunas de sus propiedades son:
+
+-   **Multiplataforma** → Funciona en Windows, macOS y Linux.
+-   **Altamente extensible** → Tiene más de **20,000 paquetes** en CRAN (repositorio oficial), además de repositorios como Bioconductor y GitHub.
+-   **Especializado en estadística y ciencia de datos** → Incluye funciones nativas para análisis descriptivos, regresiones, modelos lineales y no lineales, series temporales, minería de datos, etc.
+-   **Potente en visualización** → Herramientas gráficas integradas y librerías como `ggplot2`, o `plotly` permiten crear gráficos desde básicos hasta altamente interactivos.
+-   **Comunidad activa** → Gran cantidad de foros, tutoriales, cursos y conferencias.
+
+Entorno de R: <https://www.lcano.com/b/iser/_book/index.html>
+
+**Tiene su curva de aprendizaje...¡se supera con la práctica! ;)**
+
+**Truco**: mucho print
+
+## Algunos ejemplos iniciales
+
+-   Calculadora: en consola
+
+-   Calculadora: en script. Diferencia entre .R y .qmd.
+
+    ```{r}
+    a <- 2
+    b <- 3
+    a*b
+    ```
+
+    ```{r}
+    print('Hello world!')
+    ```
+
+```{r}
+# print("Hola","casa","hogar") # error
+print(c("Hola","casa","hogar")) 
+```
+
+```{r}
+caracteres <- c("Hola","casa","hogar")
+print(caracteres) 
+```
+
+## Variables y constantes
+
+Una **variable** es un espacio de memoria al que se le da un nombre para almacenar un valor.
+
+-   **Asignación:** se hace con `<-` (forma recomendada) o `=`.
+
+-   **Dinámicas:** una variable puede cambiar de valor a lo largo de la ejecución del programa.
+
+-   No es necesario declarar el tipo de dato (entero, float, etc.), R lo infiere automáticamente (en otros lenguajes hay que declararlo).
+
+-   **Tipos:**
+
+    -   Variables globales: se definen en el entorno principal (fuera de funciones) y se pueden usar en cualquier parte del script.
+
+    -   Variables locales: se definen dentro de una función y solo existen allí. No “escapan” al entorno global.
+
+Una **constante,** que también ocupa un espacio de memoria, es un valor fijo que no cambia durante la ejecución del programa. La diferencia entre constante y variable es que la constante es un valor predefinido, no puede cambiar (por ejemplo, $\pi$) y la variable puede cambiar su valor con la ejecución del programa.
+
+```{r}
+# Asignación de variables
+x <- 10         
+y <- 3          
+nombre <- "Ana"  
+pi_aprox <- 3.14 
+```
+
+```{r}
+IVA <- 0.1
+PRECIO_BASE <- 100
+precio_final <- PRECIO_BASE * (1 + IVA)
+precio_final
+
+```
+
+Dentro de una función:
+
+```{r}
+# Variables dentro de funciones no "escapan"
+calcular_valor_final <- function(valor_base, impuesto) {
+  valor_final <- valor_base * (1 + impuesto)
+  return(valor_final)
+}
+```
+
+La variable valor_final solo existe dentro de la función:
+
+```{r}
+#valor_final
+# valor_final no existe fuera de la función
+```
+
+```{r}
+calcular_valor_final(1000, 0.1)
+```
+
+```{r}
+calcular_valor_final(5, 0.32)
+```
+
+Comentarios:
+
+-   R distingue entre mayúsculas y minúsculas
+
+-   R entiende igual las comillas simples (' ') y las dobles (" ").
+
+-   A las variables y a las constantes se les debe poner un nombre identificativo.
+
+-   Evitar todo tipo de caracteres (tildes, diéresis, ñ, etc.).
+
+-   No pueden comenzar por caracteres ni contener espacios.
+
+    -   Pon ejemplos válidos y no válidos de nombres de variables y constantes.
+
+-   No se deben usar palabras reservadas de R
+
+    ```{r}
+    help(reserved)
+    ```
+
+### Ejercicios
+
+1.  Pon ejemplos válidos y no válidos de nombres de variables y constantes.
+
+    ```{r}
+    apañarse <- 7 # sí es válido pero es mejor no utilizar tildes y caracteres específicos de un idioma
+    # 7a <- 6 # no podemos empezar por un número
+    # $d <- 5 # no se puede empezar con dolar
+    # Num piezas <- 10 # no puede haber un espacio
+    NumPiezas <- 10 # Num_piezas, num.piezas
+
+    ```
+
+2.  Crea tres variables: tu nombre, tu edad y tu ciudad. Muéstralas en pantalla.
+
+3.  Declara una constante `PI = 3.1416` y calcula el área de un círculo de radio 5 (área = $\pi r^{2}$).
+
+4.  Crea dos precios y calcula el precio final con IVA = 0.21.
+
+5.  Usa variables `base` y `altura` para calcular el área de un triángulo (área = (base $\cdot$ altura)/2).
+
+6.  Implementa `salario_neto(bruto, tasa = 0.15)` que retorne el neto tras impuestos.
+
+::: {.callout-tip collapse="true"}
+## **Soluciones sugeridas**
+
+```{r}
+nombre <- "Ana"; edad <- 21; ciudad <- "CDMX"
+nombre; edad; ciudad
+
+PI <- 3.1416; radio <- 5; area <- PI * radio^2; area
+
+precio1 <- 120; precio2 <- 80; IVA <- 0.21
+total <- (precio1 + precio2) * (1 + IVA); total
+
+base <- 10; altura <- 6; (base * altura) / 2
+
+salario_neto <- function(bruto, tasa = 0.15){ bruto * (1 - tasa)}
+salario_neto(1000)
+```
+:::
+
+------------------------------------------------------------------------
+
+## Tipos de datos y objetos
+
+R cuenta con **tipos de datos** y **estructuras de datos (u objetos)**.
+
+**Tipos de datos principales:**
+
+-   Datos numéricos: números reales y complejos.
+
+    -   `numeric`: números decimales (ej. `3.14`)
+
+    -   `integer`: enteros (ej. `5L`, la L indica “integer”)
+
+    -   `complex`: números complejos (ej. `2+3i`)
+
+-   Caracteres: cadenas de texto representadas entre comillas.
+
+    -   `character`: texto o cadenas de caracteres
+
+-   Datos lógicos: únicamente pueden tomar 2 valores: TRUE, FALSE
+
+    -   `logical`: valores lógicos (`TRUE` / `FALSE`)
+
+```{r}
+num <- 3.14
+ent <- 5L # con la L le decimos que es un entero
+logi <- FALSE
+txt <- "Hola"
+comp <- 2 + 3i
+
+class(num); class(ent); class(logi); class(txt); class(comp)
+```
+
+**Estructuras más comunes:**
+
+-   **vector**: Colección ordenada de datos con una longitud determinada.
+
+-   **matrix**: estructura bidimensional (con filas y columnas) que almacena elementos del mismo tipo de dato
+
+-   **list**: Objeto que recoge varios tipos de elementos (componentes), que pueden ser de clases diferentes.
+
+-   **factor**: variable categórica con niveles.
+
+-   **data.frame**: Estructuras de datos bidimensionales, donde se recogen diferentes variables por columnas. Es una estructura tabular heterogénea.
+
+```{r}
+# Vectores (todos los elementos del mismo tipo)
+v_num <- c(1, 2, 3.5)
+v_chr <- c("a", "b", "c")
+v_log <- c(TRUE, FALSE, TRUE)
+
+length(v_num); class(v_num)
+
+# Si combinamos tipos de datos, R los entenderá del mismo tipo
+# Por ejemplo, en el siguiente caso entiende 1 como caracter
+c(1,'beta')
+```
+
+¿Cuál es la diferencia entre el objeto matrix y el objeto data.frame?
+
+```{r}
+# Matriz: 2D del mismo tipo
+m <- matrix(1:6, nrow = 2, ncol = 3)   # rellena por columnas
+m
+
+# Lista: contenedor heterogéneo
+lst <- list(id = 1L, nombre = "Ana", notas = c(8.5, 9, 10))
+lst$nombre; lst$notas
+
+# Data frame: tabla (cada columna puede ser de distinto tipo)
+df <- data.frame(
+  id = 1:3,
+  nombre = c("Ana", "Luis", "Eva"),
+  nota = c(9.1, 8.3, 7.5)
+)
+str(df); df$nombre
+```
+
+```{r}
+# Factor: categorías con niveles (útil para modelos y gráficos)
+sexo <- factor(c("M", "F", "F", "M"), levels = c("F", "M"))
+sexo; levels(sexo)
+
+# Coerción (cambio de tipo) y cuidado con NAs
+as.numeric("10")        # 10
+as.numeric(c("10", "x"))# 10 NA (warning)
+as.character(1:3)       # "1" "2" "3"
+
+```
+
+
+
+### Vectores
+
+Mediante el siguiente código se almacena el vector (1,2,3,4) con el nombre a:
+
+```{r}
+a <- c(1,2,3,4)
+```
+
+Para mostrarlo, se debe ejecutar a:
+
+```{r}
+a
+```
+
+Podemos crear varios vectores y combinarlos:
+
+```{r}
+v1 <- c(1,2,3)
+v2 <- c(7,8,9)
+v3 <- c(v1,4,5,6,v2)
+v3
+```
+
+Operaciones con vectores. Se aplican elemento a elemento. Se muestra el código para 2 vectores `v1` y `v2`.
+
+**Operaciones básicas con vectores**
+
+| Descripción    | Código      |
+|----------------|-------------|
+| Concatenación  | `c(v1, v2)` |
+| Suma           | `v1 + v2`   |
+| Resta          | `v1 - v2`   |
+| Multiplicación | `v1 * v2`   |
+| División       | `v1 / v2`   |
+| Potencia       | `v1 ^ v2`   |
+
+**Funciones matemáticas**
+
+| Descripción    | Código          |
+|----------------|-----------------|
+| Raíz cuadrada  | `sqrt(v1)`      |
+| Valor absoluto | `abs(v1)`       |
+| Exponencial    | `exp(v1)`       |
+| Log. base *e*  | `log(v1)`       |
+| Log. base 10   | `log10(v1)`     |
+| Factorial (!)  | `factorial(v1)` |
+
+------------------------------------------------------------------------
+
+**Estadísticos descriptivos**
+
+| Descripción         | Código        |
+|---------------------|---------------|
+| Longitud            | `length(v1)`  |
+| Máximo              | `max(v1)`     |
+| Mínimo              | `min(v1)`     |
+| Suma                | `sum(v1)`     |
+| Producto            | `prod(v1)`    |
+| Media               | `mean(v1)`    |
+| Mediana             | `median(v1)`  |
+| Desviación estándar | `sd(v1)`      |
+| Varianza            | `var(v1)`     |
+| Covarianza          | `cov(v1, v2)` |
+| Correlación         | `cor(v1, v2)` |
+
+¡A practicar!
+
+1.  Almacena 2 vectores y ejecuta las funciones previas.
+
+2.  ¿Qué significa *Inf*? ¿Y *NaN*?
+
+Existen 3 funciones principales para crear secuencias de números en R:
+
+-   `seq()` (sequence)
+
+-   `rev()` (reverse)
+
+-   `rep()` (repeat)
+
+```{r}
+v <- c(2,7,5)
+# Repeticiones
+rep(v, 2)
+rep(v, each = 2)
+rep(v, each = 2, times = 2)
+rep(v, c(2, 3, 4))
+
+# Secuencias simples
+1:10
+seq(1, 10)
+10:1
+seq(10, 1)
+
+# Secuencias personalizadas
+seq(4, length = 8)         # 8 valores desde 4
+seq(0, 40, by = 5)         # de 0 a 40 en pasos de 5
+seq(0, 1, length = 4)      # 4 valores equidistantes entre 0 y 1
+seq(from = 2, to = 8, by = 3)
+
+# Revertir secuencias
+rev(1:5)
+
+# Operaciones con secuencias
+2 * 1:4
+```
+
+#### Operadores lógicos
+
+Tomarán valor TRUE o FALSE.
+
+```{r}
+a <- c(-15,4,2,10,0,-2)
+a > 2
+a <= -10
+a > 0 & abs(a) == 2
+a > 0 | abs(a) == 2
+```
+
+-   ¿Cuál es la diferencia entre = y ==?
+
+#### Indexación
+
+La **indexación** permite acceder a los elementos de un vector. Esto significa acceder a los valores de un vector especificando su posición dentro de corchetes `[]`. Esto se realiza indicando la posición de los elementos deseados o bien mediante el uso de operadores lógicos. Se muestra el código para un vector `v`.
+
+| Código | Descripción |
+|------------------------------------|------------------------------------|
+| `v[1]` | Primer elemento |
+| `v[2:4]` | Del segundo al cuarto elemento |
+| `v[-(2:length(v))]` | Todos menos aquellos desde el segundo hasta el último elemento |
+| `v[c(2,4,6)]` | Elementos segundo, cuarto y sexto |
+| `v[v > 0]` | Elementos mayores que 0 |
+| `v[v != 0]` | Elementos diferentes de 0 |
+| `v[abs(v) == 3]` | Elementos con valor absoluto 3 |
+| `v[v > 0 & v != 2]` | Elementos positivos **y** que no sean 2 |
+| `v[v < 0 | v == 3]` | Elementos negativos **o** que sean 3 |
+
+También existe la función `which()`. En base al siguiente código, ¿cómo crees que funciona?
+
+```{r}
+v <- c(0,3,0,1,3,0)
+which(v==0)
+which(v>0 & v<=2)
+```
+
+¿Y las funciones `which.min()` y `which.max()`?
+
+::: {.callout-note}
+##  Ejercicios
+
+Dado el vector
+
+```{r}
+v <- -5:5
+```
+
+Indique qué se obtiene con las siguientes expresiones:
+
+1.  `v[c(1, length(v))]`
+2.  `v[3:7]`
+3.  `v[-c(1, length(v))]`
+4.  `v[v >= 0]`
+5.  `v[abs(v) == 4]`
+6.  `v[v != -3 & v != 3]`
+7.  `v[v < -2 | v > 2]`
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+# Suponiendo un vector v definido, por ejemplo:
+v <- -5:5
+
+# 1) v[c(1, length(v))]
+# Devuelve el primer y el último elemento del vector.
+v[c(1, length(v))]
+
+# 2) v[3:7]
+# Devuelve los elementos desde la posición 3 hasta la 7.
+v[3:7]
+
+# 3) v[-c(1, length(v))]
+# Devuelve todos los elementos excepto el primero y el último.
+v[-c(1, length(v))]
+
+# 4) v[v >= 0]
+# Devuelve los elementos que son mayores o iguales a cero.
+v[v >= 0]
+
+# 5) v[abs(v) == 4]
+# Devuelve los elementos cuyo valor absoluto es exactamente 4.
+v[abs(v) == 4]
+
+# 6) v[v != -3 & v != 3]
+# Devuelve todos los elementos excepto los iguales a -3 o a 3.
+v[v != -3 & v != 3]
+
+# 7) v[v < -2 | v > 2]
+# Devuelve los elementos que son menores que -2 o mayores que 2.
+v[v < -2 | v > 2]
+```
+::: 
+
+::: {.callout-note}
+##  Ejercicios
+Dado un vector `v`, escribe la instrucción en R que permita obtener lo siguiente:
+
+8. El segundo elemento del vector.
+9. Todos los elementos en posiciones pares.
+10. Los tres primeros elementos.
+11. Los elementos que sean negativos.
+12. Los elementos que sean múltiplos de 5. a%%b==0 entonces a es múltiplo de b
+13. El vector sin el tercer elemento.
+14. El mayor valor del vector (usando indexación, no solo max(v)).
+15. Los elementos que estén entre -2 y 2 inclusive.
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+# 8) Segundo elemento
+v[2]
+
+# 9) Posiciones pares
+v[seq(2, length(v), by = 2)]
+
+# 10) Tres primeros
+v[1:3]
+
+# 11) Negativos
+v[v < 0]
+
+# 12) Múltiplos de 5
+v[v %% 5 == 0]
+
+# 13) Sin el tercer elemento
+v[-3]
+
+# 14) Mayor valor (vía indexación)
+max(v) ; v[which.max(v)] # ¿Qué solución es mejor?
+
+# 15) Entre -2 y 2 inclusive
+v[v >= -2 & v <= 2]
+```
+::: 
+
+### Matrices
+
+Una matriz $M$ de tamaño $n \times s$ es:
+
+$M =\left( \begin{matrix} m_{11} & m_{12} & m_{13} & \cdots & m_{1s} \\ m_{21} & m_{22} & m_{23} & \cdots & m_{2s} \\ m_{31} & m_{32} & m_{33} & \cdots & m_{3s} \\ \vdots & \vdots & \vdots & \ddots & \vdots \\ m_{n1} & m_{n2} & m_{n3} & \cdots & m_{ns} \end{matrix}\right)$
+
+Creamos una matriz a partir de un vector:
+
+```{r}
+v <- 1:8
+dim(v)<-c(4,2)
+v
+```
+
+Nótese que, por defecto, R coloca los valores de arriba a abajo. Esto, por supuesto, es modificable.
+
+```{r}
+v <- 1:7
+#dim(v)<-c(4,2)
+#v
+```
+
+```{r}
+matrix(1:8,nrow=2,ncol=4)
+```
+
+```{r}
+matrix(1:3,3,3)
+```
+
+```{r}
+matrix(1:3,3,3, byrow = TRUE)
+```
+
+Especificamos número de filas o de columnas:
+
+```{r}
+matrix(1:6,nrow=2)
+matrix(1:4,ncol=2)
+```
+
+La función rbind() une por filas y cbind() une por columnas.
+
+```{r}
+a<-matrix(0,2,2)
+b<-matrix(1,1,2)
+rbind(a,b)
+cbind(1,1:4)
+```
+
+#### Array
+
+Estructura que organiza los datos en $k$ dimensiones.
+
+```{r}
+array(1:4,c(2,2,2))
+```
+
+#### Indexación y submatrices
+
+Al igual que accedíamos a elementos de los vectores con los \[\], podemos acceder a elementos de las matrices. Esto permite no sólo acceder a elementos, también modificarlos y obtener submatrices.
+
+```{r}
+a <- matrix(1:9*3,3,3)
+a[1,2] # Elemento de la fila 1 y la columna 2
+a[,3] # Tercera columna
+a[2,] # Segunda fila
+a[-1, -3] # Todas las filas menos la primera y todas las columnas menos la tercera
+a[2:3,1] # De la fila 2 a la 3, columna 1
+```
+
+```{r}
+# Cambiar elementos
+a[,1]<-0
+```
+
+Algunas operaciones básicas con matrices son:
+
+-   Dimensión de la matriz: `dim()`
+
+-   Transpuesta: `t()`
+
+-   Número de filas: `nrow()`
+
+-   Número de columnas: `ncol()`
+
+-   Suma de filas: `rowSums()`
+
+-   Suma de columnas: `colSums()`
+
+-   Media de las filas: `rowMeans()`
+
+-   Media de las columnas: `colMeans()`
+
+Investiga las funciones `is.vector()`, `is.matrix()`, `as.vector()`, `as.matrix()`. ¿Qué hacen?
+
+::: {.callout-note}
+##  Ejercicios
+
+1.   Crea una matriz llamada `M` de tamaño 3x3 con números de -2 a 6.
+2.   Sustituye el valor de la fila 2, columna 3 por 100.
+3.   Muestra todos los valores de la fila 1.
+4.   Muestra todos los valores de la columna 2.
+5.   Selecciona las dos primeras filas y las dos primeras columnas.
+6.   Añade una nueva fila con valores `c(10,20,30)`.
+7.   Añade una columna con valores `c(5,5,5,5,5)`.
+8.   Añade una columna con valores `c(5,-5,5,-5)`.
+9.   Cambia a 0 todos los elementos mayores que 20.
+10.   Cambia los valores negativos menores de -1 por su valor absoluto.
+11. Obtén la suma de las filas.
+12. Obtén la media de las columnas.
+13. ¿Cuál es la dimensión final de la matriz?
+14. Pon nombres a las filas y a las columnas.
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+## 1) Matriz M 3x3 con números de -2 a 6
+M <- matrix(-2:6, nrow = 3, ncol = 3)
+M
+
+## 2) Sustituye fila 2, columna 3 por 100
+M[2, 3] <- 100
+M
+
+## 3) Todos los valores de la fila 1
+M[1, ]
+
+## 4) Todos los valores de la columna 2
+M[, 2]
+
+## 5) Dos primeras filas y dos primeras columnas
+M[1:2, 1:2]
+
+## 6) Añade una nueva fila c(10,20,30)
+M <- rbind(M, c(10, 20, 30))
+M  # ahora 4 x 3
+
+## 7) Añade una columna c(5,5,5,5,5)
+##    No cumple con las dimensiones de la matriz: cbind(M, c(5,5,5,5,5))
+
+## 8) Añade una columna c(5,-5,5,-5)
+M <- cbind(M, c(5, -5, 5, -5))
+M  # ahora 4 x 5
+
+## 9) Cambia a 0 todos los elementos > 20
+M[M > 20] <- 0
+M
+
+## 10) Cambia a su valor absoluto los negativos menores de -1
+idx <- M < -1
+M[idx] <- abs(M[idx])
+M
+
+## 11) Suma de las filas
+rowSums(M)
+
+## 12) Media de las columnas
+colMeans(M)
+
+## 13) Dimensión final de la matriz
+dim(M)
+
+## 14) Pon nombres a las filas y a las columnas
+rownames(M) <- paste0("Fila", 1:nrow(M))
+colnames(M) <- paste0("Col", 1:ncol(M))
+M
+#Otra opción es:
+rownames(M) <- c("row1","row2","row3","row4")
+```
+::: 
+
+### Factor
+
+Un factor es un tipo especial de vector para representar variables de tipo atributo o categóricas. En general, la característica podrá tomar un reducido número de valores diferentes, identificados con etiquetas (*labels*) y que llamaremos **niveles** del factor (*levels*). R crea los niveles del factor a partir de los distintos valores que toma la variable (valores únicos, que se pueden obtener con la función `unique`) ordenados de forma ascendente, y almacena solamente el código de etiqueta.
+
+```{r}
+factor(c("viejo", "viejo", "nuevo1", "nuevo2"), 
+       levels = c("viejo", "nuevo1", "nuevo2"))
+```
+
+Imaginemos que tenemos las siguientes piezas:
+
+```{r}
+piezas <- c(1, 2, 3, 3)
+piezas
+```
+
+```{r}
+piezas <- factor(piezas,labels = c("M01", "M02", "M03"))
+piezas
+```
+
+::: {.callout-note}
+##  Ejercicios
+
+1.  Crea un vector con las categorías `"Alto"`, `"Medio"`, `"Bajo"`, repitiéndolas varias veces, y conviértelo en un factor.
+2.  Verifica los niveles del factor.
+3.  Consulta cuántos elementos hay de cada nivel usando `table()`.
+4.  Crea un factor ordenado llamado `talla` con los valores `c("S", "M", "L", "S", "L", "M")`, donde el orden sea `S < M < L`.
+5.  Comprueba qué talla es mayor: `"S"` o `"M"`.
+6.  Dado un vector de calificaciones `c(4, 7, 9, 5, 8, 3)`, crea un factor categorizando cada nota en:
+
+    -   `"Suspenso"` (\<5)
+
+    -   `"Aprobado"` (5–6.9)
+
+    -   `"Notable"` (7–8.9)
+
+    -   `"Sobresaliente"` (≥9)
+  Usa la función `cut()`.
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+## 1) 
+niveles <- c("Alto", "Medio", "Bajo", "Alto", "Bajo")
+f <- factor(niveles)
+f
+
+## 2) 
+levels(f)
+
+## 3) 
+table(f)
+
+## 4) 
+talla <- factor(c("S", "M", "L", "S", "L", "M"),
+                    levels = c("S", "M", "L"),
+                    ordered = TRUE)
+talla
+    
+## 5) 
+talla[1] < talla[2]   # TRUE
+
+## 6) 
+notas <- c(4, 7, 9, 5, 8, 3)
+categorias <- cut(notas,
+                      breaks = c(-Inf, 5, 7, 9, Inf),
+                      labels = c("Suspenso", "Aprobado", "Notable", "Sobresaliente"),
+                      right = FALSE)
+categorias
+table(categorias)
+class(categorias)
+```
+::: 
+
+
+### Listas
+
+Las listas son estructuras de datos que contienen una colección de elementos indexados, que pueden además tener un nombre. Pueden ser heterogéneas en el sentido de que cada elemento de la lista puede ser de cualquier tipo.
+
+Las listas se pueden anidar, de forma que un elemento de la lista puede ser, a su vez, una lista. Accederemos a estos elementos profundizando con el mismo operador `$`, por ejemplo `lista1$elemento1$subelemento2`.
+
+```{r}
+# Lista: contenedor heterogéneo
+lst <- list(fruta = "manzana", peso = c(125, 115, 209))
+lst; lst$fruta; lst$peso
+```
+
+```{r}
+lst["fruta"]; lst['peso'] 
+```
+
+```{r}
+lst[1]; lst[[1]]
+```
+
+::: {.callout-note}
+##  Ejercicios
+
+1.  Crear una lista llamada `persona` con los siguientes elementos:
+
+    -   nombre: `"Carmen"`
+
+    -   edad: `21`
+
+    -   notas: `c(8.5, 9, 7.5)`
+
+2.  Accede al nombre de la persona usando `$` y usando `[[]]`
+3.  A partir de la lista `persona`, accede a la segunda nota.
+4.  Cambia la edad de `persona` a `24`.
+5.  Agrega un nuevo elemento llamado `deporte` con valor `"Atletismo"`.
+6.  Crea una lista `clase` con tres alumnos, cada uno con sus propios datos (nombre, edad y notas).
+7.  Accede al nombre del segundo alumno.
+8.  Resta un punto a la primera nota del alumno 3.
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+## 1) 
+persona <- list(
+    nombre = "Carmen",
+    edad = 21,
+    notas = c(8.5, 9, 7.5)
+    )
+
+## 2) 
+persona$nombre
+persona[["nombre"]]
+    
+## 3) 
+persona$notas[2]
+
+## 4) 
+persona$edad <- 24
+
+## 5) 
+persona$deporte <- "Atletismo"
+
+## 6) 
+clase <- list(
+      alumno1 = list(nombre = "Ana", edad = 21, notas = c(9, 8, 7)),
+      alumno2 = list(nombre = "Luis", edad = 22, notas = c(6, 7, 8)),
+      alumno3 = list(nombre = "Carlos", edad = 23, notas = c(10, 9, 9.5))
+    )
+
+## 7) 
+clase$alumno2$nombre
+
+## 8)
+clase$alumno3$notas[1] <- clase$alumno3$notas[1] - 1
+
+```
+:::
+
+### DataFrames
+Un data frame en R es una estructura de datos bidimensional en forma de tabla, similar a una hoja de cálculo o a una tabla de base de datos. Cada columna es un vector, y puede tener un tipo de dato distinto (números, texto, lógicos, factores, etc.). Todas las filas representan observaciones (registros) y tienen la misma longitud.
+Es la estructura más utilizada en R para análisis de datos (existen versiones más modernas como `tibble` del paquete `tibble` y `dplyr`), ya que permite organizar datos de manera clara y trabajar con ellos mediante funciones estadísticas y gráficas. Algunas características son:
+
+- Bidimensional: filas y columnas.
+- Heterogéneo por columnas: cada columna puede tener un tipo de dato diferente.
+- Homogéneo por columna: dentro de una columna, todos los datos son del mismo tipo.
+- Indexación: se puede acceder a elementos por [fila, columna], por nombre de columna ($) o por índices.
+
+Un ejemplo básico de creación de un dataframe sería:
+```{r}
+df <- data.frame(
+  id = 1:3,
+  nombre = c("Ana", "Luis", "Eva"),
+  edad = c(21, 25, 23),
+  aprobado = c(TRUE, TRUE, FALSE)
+)
+
+df
+```
+
+Podemos acceder a los datos de forma similar a como hemos visto para otras estructuras de datos:
+```{r}
+df$nombre        # Columna 'nombre'
+df[ , "edad"]    # Columna 'edad'
+df[1, ]          # Primera fila completa
+df[2, 3]         # Elemento fila 2, columna 3 (edad de Luis)
+```
+
+Algunas funciones comunes son:
+
+- `nrow(df)`:  Número de filas
+- `ncol(df)`: Número de columnas
+- `colnames(df)`:  Nombres de columnas
+- `rownames(df)`: Nombres de filas
+- `str(df)`: Estructura
+- `summary(df)`: Resumen estadístico
+- `head(df)`: primeras filas del dataframe
+
+Podemos cargar algunos dataframes ya contenidos en paquetes de R. Por ejemplo, el conjunto de datos iris cuenta con mediciones de pétalos y sépalos de tres especies de flores.
+```{r}
+head(iris)
+```
+```{r}
+iris
+```
+
+
+```{r}
+str(iris)
+```
+
+
+```{r}
+summary(iris)
+```
+
+
+::: {.callout-note}
+##  Ejercicios
+
+1. Crea un data frame llamado `df` con tres columnas:
+  - `id` con valores del 1 al 3,
+  - `nombre` con tres nombres,
+  - `edad` con tres edades.
+2. Muestra el número de filas y de columnas del data frame.
+3. Consulta los nombres de las columnas y de las filas.
+4. Accede a la segunda fila completa del data frame.
+5. Extrae la columna `edad` de tres maneras distintas:
+  - usando $,
+  - usando corchetes con nombre de columna,
+  - usando el índice de la columna.
+6. Cambia el nombre de la segunda fila a `"AlumnoB"`.
+7. Renombra la columna nombre a `NombreCompleto`.
+8. Añade una nueva columna `curso` con los valores `"R1"`, `"R2"`, `"R3"`.
+9. Añade una nueva fila con los datos: `id=4`, `NombreCompleto="Eva"`, `edad=22`, `curso="R1"`.
+10. Convierte la columna `curso` en un factor y muestra sus niveles.
+11. Convierte el data frame en una matriz con `as.matrix()` y explica la diferencia observada en los tipos de datos.
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+# 1) Crear df
+df <- data.frame(
+  id     = 1:3,
+  nombre = c("Ana", "Luis", "Mario"),
+  edad   = c(20, 22, 21)
+)
+df
+
+# 2) Número de filas y columnas
+nrow(df)
+ncol(df)
+
+    
+# 3) Nombres de columnas y filas 
+colnames(df)
+rownames(df)
+
+# 4) Segunda fila completa
+df[2, ]
+
+
+# 5) Columna 'edad' de tres formas
+df$edad
+df[, "edad"]
+df[[3]]         # tercera columna
+
+
+# 6) Cambiar nombre de la segunda fila a "AlumnoB"
+rownames(df)[2] <- "AlumnoB"
+rownames(df)
+
+
+# 7) Renombrar columna 'nombre' a 'NombreCompleto'
+names(df)[names(df) == "nombre"] <- "NombreCompleto"
+colnames(df) 
+
+
+# 8) Añadir columna 'curso'
+df$curso <- c("R1", "R2", "R3")
+df
+
+
+# 9) Añadir una nueva fila
+df <- rbind( df, data.frame(id = 4, NombreCompleto = "Eva", edad = 22, curso = "R1"))
+row.names(df) <- NULL # resetear el nombre de las filas
+
+# 10) Convertir 'curso' en factor y mostrar niveles
+class(df$curso)
+df$curso <- factor(df$curso)
+levels(df$curso)
+class(df$curso)
+
+# 11) Convertir el data frame en matriz
+M <- as.matrix(df)
+str(M)   # todos los elementos del mismo tipo, character
+
+
+```
+:::
+
+Practiquemos un poco más con el dataframe penguins de la librería palmerpenguins de R. Para ello, debemos comenzar por instalar y cargar la librería.
+```{r}
+install.packages("palmerpenguins") # solo se ejecuta 1 vez
+library(palmerpenguins)
+penguins
+```
+::: {.callout-note}
+##  Ejercicios
+1. Vistazo general
+  - Muestra las primeras filas de penguins.
+  - Ejecuta summary(penguins) y comenta qué información devuelve.
+
+2. Filtro simple: ¿Cuántos pingüinos son hembra (sex == "female") y cuántos son macho (sex == "male")? 
+
+3. Filtro con condiciones: Obtén el peso corporal (body_mass_g) de los pingüinos de la isla "Dream" que sean machos.
+
+4. Acceso a columnas
+  - Extrae la columna species como vector.
+  - Extrae simultáneamente las columnas species y island.
+
+5. ¿Cuál es el número de especies distintas en el dataset?
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+library(palmerpenguins)
+
+# 1) Inspección
+head(penguins)
+summary(penguins)
+
+# 2) Conteo por sexo
+table(penguins$sex)
+
+# 3) Peso de machos en la isla Dream
+penguins$body_mass_g[penguins$island == "Dream" & penguins$sex == "male"]
+
+# 4) Acceso a columnas
+penguins$species
+penguins[, c("species", "island")]
+
+# 5) Número de especies distintas
+length(unique(penguins$species))
+```
+::: 
+
+
+
+# Condicionales
+
+Los **condicionales** permiten que un programa tome decisiones dependiendo de si una condición es verdadera o falsa. Una condición es una expresión que se evalúa y devuelve un valor lógico:
+
+ - TRUE (verdadero)
+
+ - FALSE (falso)
+
+Según el resultado, el programa ejecuta unas instrucciones u otras. Así, los condicionales permiten que el programa no sea lineal, sino que pueda ''elegir distintos caminos'' según la situación.
+
+Algunos ejemplos sencillos serían:
+ 
+  - Verificar si un número es positivo o negativo.
+
+  - Comprobar si una persona es mayor de edad.
+
+  - Tomar distintas acciones según el valor de una variable.
+
+  - Clasificar datos en categorías (aprobado/suspenso, par/impar, etc.).
+  
+
+¿Cómo lo haremos en R?
+
+  - `if()`
+  - `else()`
+  - `else if()`
+  - `ifelse()`
+
+## if
+
+Sintaxis:
+
+``` r
+if (condición) {
+  # código que se ejecuta si la condición es verdadera (TRUE)
+}
+
+```
+
+Ejemplo
+```{r}
+x <- 10
+if (x > 0) {
+  print("El número es positivo")
+}
+
+```
+
+Hagamos ahora un código que, dado un número positivo, lo hace negativo:
+```{r}
+num <- 2
+if (num > 0) {
+  num <- num * -1
+}
+print(num)
+```
+
+¿Qué devolverá el siguiente código?
+```{r}
+num <- -4
+if (num > 0) {
+  num <- num * -1
+}
+print(num)
+```
+Añadimos comentarios:
+```{r}
+num <- 4
+if (num > 0) { # Si el número es positivo
+  print('El número es positivo')
+  print('Se transformará en negativo')
+  num <- num * -1 # Multiplicar por -1 para que sea negativo
+}
+print(num)
+```
+
+¿Podríamos hacer esto con un vector?
+```r
+num <- c(4,5,7,-5)
+if (num > 0) { # Si el número es positivo
+  print('El número es positivo')
+  print('Se transformará en negativo')
+  num <- num * -1 # Multiplicar por -1 para que sea negativo
+}
+print(num)
+```
+
+El código `if()` espera un único valor `TRUE` o `FALSE`. Cuando pasamos un vector, se devuelve un vector de `TRUE` o `FALSE`, pero no un único valor. Para que los condicionales lo entiendan, hay que convertirlo en un único valor con las funciones `all()` o `any()`. 
+
+¿Qué hace cada uno de los siguientes códigos?
+
+```{r}
+num <- c(4,5,7,-5)
+if (all(num > 0)) { # Si todos los números son positivos
+  print('Todos los números son positivos')
+  print('Todos los números se multiplicarán por -1 y serán negativos')
+  num <- num * -1 # Multiplicar por -1 todo el vector
+}
+print(num)
+```
+
+```{r}
+num <- c(4,5,7,-5)
+if (any(num > 0)) { # Si algún número es positivo
+  print('Al menos un número es positivo')
+  print('Todos los números se multiplicarán por -1 y cambiarán de signo')
+  num <- num * -1 # Multiplicar por -1 todo el vector
+}
+print(num)
+```
+
+¿Cómo hacemos para solo transformar los positivos?
+```{r}
+num <- c(4,5,7,-5)
+if (any(num > 0)) { # Si algún número es positivo
+  print('Al menos un número es positivo')
+  print('Todos los números serán negativos o 0')
+  num[num>0] <- num[num>0] * -1 # Multiplicar por -1 todo el vector
+}
+print(num)
+```
+
+
+::: {.callout-note}
+##  Ejercicios
+¿Qué devuelven los siguientes códigos?
+
+1. 
+```r
+x <- 10
+if (5 == 5) {
+  x <- 8
+}
+x
+```
+
+2. 
+```r
+x <- 10
+if (TRUE) {
+  x <- 8
+}
+x
+```
+
+3. 
+```r
+x <- 10
+if (x == 10) {
+  x <- 8
+  if (x == 10) {
+    x <- 6
+  }
+}
+x
+```
+:::
+
+
+
+
+## if ... else
+A veces necesitamos ejecutar una acción si la condición es verdadera y otra diferente si es falsa.
+
+Sintaxis:
+
+``` r
+if (condición) {
+  # código si condición es TRUE
+} else {
+  # código si condición es FALSE
+}
+
+```
+
+Ejemplo
+```{r}
+edad <- 17
+if (edad >= 18) {
+  print("Eres mayor de edad")
+} else {
+  print("Eres menor de edad")
+}
+
+
+```
+
+
+## if ... else if ... else
+Podemos encadenar condiciones con else if.
+
+Sintaxis:
+
+``` r
+if (condición1) {
+  # código si condición1 es TRUE
+} else if (condición2) {
+  # código si condición1 es FALSE y condición2 es TRUE
+} else {
+  # código si condición1 y condición2 son FALSE
+}
+
+```
+
+**Ejemplo**
+Queremos clasificar una nota en "Suspenso", "Aprobado", "Notable" o "Sobresaliente".
+
+```{r}
+nota <- 9
+
+if (nota >= 5) {
+  print("Aprobado")
+} else if (nota >= 7) {
+  print("Notable")
+} else if (nota >= 9) {
+  print("Sobresaliente")
+} else {
+  print("Suspenso")
+}
+
+```
+Con nota <- 9, ¿qué pasa?
+El programa imprime "Aprobado", aunque debería ser "Sobresaliente".
+¿Qué problema tiene este código? Las condiciones están mal ordenadas:
+  - La primera condición if (nota >= 5) ya se cumple para 9, por lo que se ejecuta y el resto de condiciones se ignoran.
+  - Nunca llega a comprobar si es "Notable" o "Sobresaliente".
+
+**Ejemplo corregido**
+La lógica correcta sería poner las condiciones de más restrictiva a menos restrictiva, o en orden adecuado:
+```{r}
+nota <- 9
+
+if (nota >= 9) {
+  print("Sobresaliente")
+} else if (nota >= 7) {
+  print("Notable")
+} else if (nota >= 5) {
+  print("Aprobado")
+} else {
+  print("Suspenso")
+}
+
+```
+
+Otra manera sería:
+
+```{r}
+nota <- 9
+if (nota < 5) {
+  print("Suspenso")
+} else if (nota < 7) {
+  print("Aprobado")
+} else if (nota < 9) {
+  print("Notable")
+} else {
+  print("Sobresaliente")
+}
+
+```
+
+
+¡Importante! Definir bien las condiciones lógicas y su orden.
+
+
+
+
+## Condicional vectorizado: `ifelse()`
+La función `ifelse()` se usa cuando queremos evaluar una condición sobre un vector completo. Esto significa que permite aplicar una condición sobre cada elemento de un vector y devolver un resultado distinto según sea verdadero (`TRUE`) o falso (`FALSE`). Es útil para crear nuevas columnas en data.frames.
+
+Sintaxis:
+```r
+ifelse(condición, valor_si_verdadero, valor_si_falso)
+```
+  * `condición` --> expresión lógica que devuelve `TRUE` o `FALSE` (puede ser un vector lógico).
+
+  * `valor_si_verdadero` --> lo que se devuelve en la posición donde la condición es `TRUE`.
+
+  * `valor_si_falso` --> lo que se devuelve en la posición donde la condición es `FALSE`.
+
+Ejemplo:
+```{r}
+edades <- c(12, 18, 25, 16)
+ifelse(edades >= 18, "Adulto", "Menor")
+# Resultado: "Menor" "Adulto" "Adulto" "Menor"
+
+```
+
+También se pueden anidar varios `ifelse()` para clasificar en más de dos categorías:
+```{r}
+nota <- c(4, 6, 8, 10, NA)
+
+clasificacion <- ifelse(is.na(nota), "Sin dato",
+                        ifelse(nota < 5, "Suspenso",
+                               ifelse(nota < 7, "Aprobado",
+                                      ifelse(nota < 9, "Notable", "Sobresaliente"))))
+
+clasificacion
+# "Suspenso" "Aprobado" "Notable" "Sobresaliente" "Sin dato"
+
+```
+
+
+
+::: {.callout-note}
+##  Ejercicios
+
+1. Escribe un programa que diga si un número almacenado en una variable `x` es positivo, negativo o cero.
+
+2. Crea una variable `edad` y escribe un condicional que muestre `'Jubilado'"'` si es `≥ 65`, y `'Menor'` si es `< 65`.
+
+3. Comprobar el estado del agua en base a su temperatura (sólido, líquido o gaseoso).
+
+4. Con un vector `v <- c(-3, 0, 5, -1, 2)`, usa `ifelse()` para crear otro vector que diga `'No negativo'` o `'Negativo'`.
+
+5. Usa `ifelse()` para clasificar un vector de edades en `'niño'` (menor de 12), `'adulto'` (12 a 64), `'mayor'` (65 o más).
+6. Escribe un programa que determine si un número es positivo par, positivo impar, negativo par, negativo impar o cero.
+7. Dados dos números `a` y `b`, escribe un programa que diga quién gana.
+8. Programa el juego piedra, papel o tijera.
+9. Con los datos penguins de la librería palmerpenguins:
+
+    9.1. Crea una columna isla2 tal que: Si island == "Dream" --> "Isla Sueño". En otro caso, deja el nombre original
+    
+    9.2. Crea una columna sexo2 que sea "Desconocido" si sex es NA y el valor original de sex en otro caso
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+# 1) Número positivo, negativo o cero
+x <- -3
+if (x > 0) {
+  print("Positivo")
+} else if (x < 0) {
+  print("Negativo")
+} else {
+  print("Cero")
+}
+
+# 2) Jubilado
+edad <- 70
+if (edad >= 65) {
+  print("Jubilado")
+} else {
+  print("No jubilado")
+}
+
+# 3) Estado sólido, líquido o gaseoso (agua)
+temp <- 90
+if (temp <= 0) {
+  print("Sólido")
+} else if (temp < 100) {
+  print("Líquido")
+} else {
+  print("Gaseoso")
+}
+
+# 4) Vector de negativos vs no negativos
+v <- c(-3, 0, 5, -1, 2)
+ifelse(v < 0, "Negativo", "No negativo")
+
+# 5) Clasificación de edades
+edades <- c(8, 20, 70, 15, 65)
+ifelse(edades < 12, "Niño",
+       ifelse(edades < 65, "Adulto", "Mayor"))
+
+# 6) Determinar si un número es "positivo par", "positivo impar", "negativo par", "negativo impar" o "cero"
+n <- 5
+if (n == 0) {
+  print("Cero")
+} else if (n > 0 & n %% 2 == 0) {
+  print("Positivo par")
+} else if (n > 0 & n %% 2 != 0) {
+  print("Positivo impar")
+} else if (n < 0 & n %% 2 == 0) {
+  print("Negativo par")
+} else {
+  print("Negativo impar")
+}
+
+# 7) Dado a y b, ¿quién gana?
+a <- 15
+b <- 20
+
+if (a > b) {
+  print("Gana A")
+} else if (a < b) {
+  print("Gana B")
+} else {
+  print("Empate")
+}
+
+# 8) 
+# Opciones posibles
+jugador1 <- "piedra"
+jugador2 <- "tijera"
+
+if (jugador1 == jugador2) {
+  print("Empate")
+} else if ((jugador1 == "piedra" & jugador2 == "tijera") |
+           (jugador1 == "tijera" & jugador2 == "papel") |
+           (jugador1 == "papel" & jugador2 == "piedra")) {
+  print("Gana Jugador 1")
+} else {
+  print("Gana Jugador 2")
+}
+
+# 9) Penguins
+library(palmerpenguins)
+data(penguins)
+
+# 9.1) 
+penguins$isla2 <- ifelse(penguins$island == "Dream",
+                         "Isla Sueño",
+                         penguins$island)
+
+# 9.2) 
+penguins$sexo2 <- ifelse(is.na(penguins$sex), "Desconocido", as.character(penguins$sex))
+
+
+```
+:::
+
+
+
+# Ciclos
+
+Un ciclo (o bucle) permite repetir automáticamente un conjunto de instrucciones varias veces.
+
+  * Sin bucles, tendríamos que copiar/pegar el mismo código muchas veces.
+
+  * Con bucles, el programa se vuelve más corto, más claro y más flexible.
+
+## Ciclo for
+Sirve para repetir una instrucción un número conocido de veces (recorriendo una secuencia o vector). For es determinista, es decir, sabemos cuántas veces se repite.
+
+Sintaxis:
+```r
+for (variable in secuencia) {
+  # instrucciones a repetir
+}
+
+```
+
+Ejemplos
+
+```{r}
+for (i in 1:5) {
+  print(i)
+}
+# Imprime los números del 1 al 5
+```
+
+
+```{r}
+nombres <- c("Ana", "Luis", "Marta")
+for (n in nombres) {
+  cat("Hola", n, "\n")
+}
+
+```
+
+```{r}
+for (i in c("Mi", "primer", "bucle")) {
+  print("hola")
+}
+```
+
+```{r}
+for (i in c("Mi", "primer", "bucle")) {
+  print(i)
+}
+```
+
+¿Cuánto vale `i`?
+```{r}
+i
+```
+
+```{r}
+texto <- c("Este", "es", "mi", "primerito","bucle")
+palabra <- vector(length = length(texto))
+
+for (i in 1:length(texto)) {
+  palabra[i] <- texto[i]
+}
+
+palabra
+```
+
+
+
+## Ciclo while
+Sirve para repetir instrucciones mientras se cumpla una condición lógica. While se utiliza cuando no sabemos cuántas iteraciones necesitaremos. Ideal para procesos que dependen de algo que no sabemos cuándo ocurrirá (ej. esperar que aparezca un valor, que el usuario adivine un número).
+
+Sintaxis:
+```r
+while (condición) {
+  # instrucciones a repetir
+}
+
+```
+Importante: la condición debe cambiar dentro del bucle, si no, puede convertirse en un bucle infinito.
+
+
+Ejemplos
+
+```{r}
+x <- 1
+while (x <= 5) {
+  print(x)
+  x <- x + 1
+}
+# Hace lo mismo que el for, pero controlando la condición manualmente
+
+```
+
+```{r}
+x <- 5
+while (x > 0) {
+  print(x)
+  x <- x - 1
+}
+```
+
+Lanzar un dado hasta obtener un 6:
+```{r}
+tiradas <- 0
+dado <- 0
+while (dado != 6) {
+  dado <- sample(1:6, 1)
+  tiradas <- tiradas + 1
+}
+cat("Se necesitaron ", tiradas, " tiradas.\n")
+```
+
+
+## Ejemplo con for y while. Adivinar un número.
+### For
+En esta versión sabemos de antemano el número máximo de intentos `n`.
+
+```{r}
+n <- 5 # número de intentos
+secreto <- 7 # número secreto por adivinar
+acierto <- FALSE
+
+for (intento in 1:n) {
+  propuesta <- sample(1:10, 1)   # simulamos intento
+  cat("Intento", intento, ":", propuesta, "\n")
+  
+  if (propuesta == secreto) {
+    cat("¡Has acertado!")
+    acierto <- TRUE
+    break   # salimos del bucle si acierta
+  }
+}
+
+if (!acierto) {
+  print("No acertaste en 5 intentos.")
+}
+
+```
+
+### While
+En esta versión no sabemos cuántos intentos serán necesarios, el bucle continúa hasta acertar.
+```{r}
+secreto <- 7
+propuesta <- 15
+intentos <- 0
+
+while (propuesta != secreto) {
+  propuesta <- sample(1:10, 1)   # simulamos intento
+  intentos <- intentos + 1
+  cat("Intento", intentos, ":", propuesta, "\n")
+}
+
+cat("¡Has acertado en", intentos, "intentos!")
+
+```
+## Bucles enlazados
+
+¿Qué hace el siguiente código?
+```{r}
+n <- 3
+for (i in 1:n) {
+  for (j in 1:n) {
+    cat("i =", i, " j =", j, "\n")
+  }
+}
+
+```
+
+¿Qué observamos?
+
+  * El bucle externo (i) controla la fila --> cambia más lentamente.
+  * El bucle interno (j) controla la columna --> cambia más rápido.
+  * En total se ejecuta $n \times n$ veces (en este caso, 9 iteraciones).
+  
+Esto es justo lo que ocurre cuando recorremos todas las celdas de una matriz.
+
+
+Podemos añadir un contador para mostrar el número de ejecución total:
+```{r}
+n <- 3
+contador <- 0
+for (i in 1:n) {
+  for (j in 1:n) {
+    contador <- contador + 1
+    cat("Iteración", contador, ": i =", i, " j =", j, "\n")
+  }
+}
+
+```
+
+¿Cuántas veces se entra en cada bucle?
+```{r}
+# Dimensiones
+n <- 3
+m <- 4
+
+# Contadores
+cont_i <- 0
+cont_j <- 0
+
+for (i in 1:n) {
+  cont_i <- cont_i + 1     # cada vez que se entra al bucle externo
+  for (j in 1:m) {
+    cont_j <- cont_j + 1   # cada vez que se ejecuta el bucle interno
+  }
+}
+
+cat("Número de iteraciones de i:", cont_i, "\n")
+cat("Número de iteraciones de j:", cont_j, "\n")
+
+```
+De forma más visual, se puede imprimir en cada vuelta los valores actuales y un contador global:
+```{r}
+n <- 3
+m <- 4
+contador <- 0
+
+for (i in 1:n) {
+  for (j in 1:m) {
+    contador <- contador + 1
+    cat("Iteración global:", contador, "| i =", i, "| j =", j, "\n")
+  }
+}
+
+```
+
+
+
+Algunos ejemplos:
+
+  * Rellenar una matriz  (M[i, j] = i * j):
+```{r}
+n <- 5
+M <- matrix(0, n, n)
+for (i in 1:n) {
+  for (j in 1:n) {
+    M[i, j] <- i * j
+  }
+}
+M
+```
+
+
+* ¿Cuántos elementos superan la media de su fila?
+```{r}
+set.seed(3)
+M <- matrix(sample(1:9, 12, replace = TRUE), nrow = 4)
+conteo_supera_media <- rep(0,nrow(M))
+
+for (i in 1:nrow(M)) {
+  media_i <- mean(M[i, ])
+  cuenta <- 0
+  for (j in 1:ncol(M)) {
+    if (M[i, j] > media_i){
+      cuenta <- cuenta + 1
+    } 
+  }
+  conteo_supera_media[i] <- cuenta
+}
+conteo_supera_media
+
+```
+
+
+::: {.callout-note}
+##  Ejercicios
+
+1.  ¿Qué hace este código?
+
+    ```{r}
+for (i in seq(2, 10, 2)) {
+  print(i)
+}
+    ```
+
+2.  ¿Qué hace este código?
+```{r}
+x <- 5
+while (x > 0) {
+  print(x)
+  x <- x - 1
+}
+```
+
+
+3. Haz un ciclo que imprima los números del 1 al 20, pero solo los pares.
+
+4. Haz un bucle que cuente cuántos números del 1 al 200 son múltiplos de 3.
+5. Escribe un ciclo que busque el primer número mayor que 100 divisible por 13.
+6. Con un ciclo, genera los 10 primeros números de la serie de Fibonacci. La serie de Fibonacci es una secuencia de números enteros en la que cada número (a partir del tercero) se obtiene sumando los dos anteriores. Los primeros términos de la serie son: 0, 1, 1, 2, 3, 5, 8, 13, ... Es decir,
+
+  * El primer término es 0.
+  * El segundo término es 1.
+  * A partir del tercero: $F(n) = F(n-1) + F(n-2)$.
+
+7. Piedra, papel o tijera. Haz un programa con un for de 5 rondas donde el ordenador elija al azar entre "piedra", "papel", "tijera", y cuente cuántas veces gana, pierde o empata contra el jugador (puede ser también aleatorio para simplificar).
+8. Un estudiante mete 10 € al mes en una hucha. Usa un for para calcular cuánto dinero tendrá después de 12 meses, y luego añade un if que diga "¡Superaste los 100 €!" si corresponde.
+9. Simula 10 rondas en las que se elige un número aleatorio entre 1 y 10. Si el número es par gana el Jugador A, si es impar gana el Jugador B. Al final, crea un vector que muestre cuántas rondas ganó cada jugador y quién es el ganador.
+10. Crea una matriz M de tamaño $n \times m$ tal que M[i, j] = i^2 + j^2.
+11. Dada una matriz M de números enteros generados aleatoriamente, construye una matriz binaria del mismo tamaño en la que:
+
+  * El valor sea 1 si el elemento de M está por encima de la media de su columna.
+  * El valor sea 0 en caso contrario (si está en la media o por debajo).
+  
+12. Usando el conjunto de datos iris, crea una nueva columna binaria que indique si la longitud del sépalo (Sepal.Length) de cada flor está por encima de la media de su especie.
+
+ * Si está por encima de la media de su especie --> valor 1.
+ * Si está en la media o por debajo --> valor 0.
+
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+# 1) Imprime los pares de la secuencia
+
+# 2) Cuenta hacia atrás
+
+# 3) 
+for (i in 1:20) {
+  if (i %% 2 == 0) {
+    print(i)
+  }
+}
+
+# 4) Contar múltiplos de 3 entre 1 y 200
+contador <- 0
+for (i in 1:200) {
+  if (i %% 3 == 0) {
+    contador <- contador + 1
+  }
+}
+contador  # resultado
+
+# 5) Buscar el primer número > 100 divisible por 13 (while)
+n <- 101
+while (n %% 13 != 0) {
+  n <- n + 1
+}
+n  # primer múltiplo de 13 mayor que 100
+
+# 6) Serie de Fibonacci: primeros 10 términos
+fib <- numeric(10)
+fib[1] <- 0; fib[2] <- 1
+for (i in 3:10) {
+  fib[i] <- fib[i-1] + fib[i-2]
+}
+fib
+
+# 7) Piedra, papel o tijera (5 rondas aleatorias jugador vs ordenador)
+opciones <- c("piedra", "papel", "tijera")
+gana_j <- 0
+gana_pc <- 0
+empates <- 0
+n_rondas <- 5
+for (r in 1:n_rondas) {
+  j <- sample(opciones, 1)
+  pc <- sample(opciones, 1)
+  if (j == pc) {
+    empates <- empates + 1
+  } else if ((j == "piedra"  & pc == "tijera") ||
+             (j == "tijera" & pc == "papel")  ||
+             (j == "papel"  & pc == "piedra")) {
+    gana_j <- gana_j + 1
+  } else {
+    gana_pc <- gana_pc + 1
+  }
+}
+c(gana_j = gana_j, gana_pc = gana_pc, empates = empates)
+
+# 8) Simulación de ahorro: 10 € al mes durante 12 meses
+ahorro <- 0
+for (mes in 1:12) {
+  ahorro <- ahorro + 10
+}
+ahorro
+if (ahorro > 100){
+  print("¡Superaste los 100 €!")
+}  else {
+  "No superaste los 100 €"
+}
+
+# 9) Juego de pares o impares (10 rondas)
+gana_A <- 0
+gana_B <- 0
+n_rondas <- 10
+for (r in 1:n_rondas) {
+  num <- sample(1:10, 1)
+  if (num %% 2 == 0) {
+    gana_A <- gana_A + 1  # par --> A
+  } else {
+    gana_B <- gana_B + 1  # impar --> B
+  }
+}
+c(gana_A = gana_A, gana_B = gana_B,
+  ganador = ifelse(gana_A > gana_B, "A", ifelse(gana_B > gana_A, "B", "Empate")))
+
+# 10) 
+n <- 4
+m <- 5
+M <- matrix(0, n, m)
+for (i in 1:n) {
+  for (j in 1:m) {
+    M[i, j] <- i^2 + j^2
+  }
+}
+M
+
+# 11) 
+set.seed(1)
+M <- matrix(sample(1:9, 20, replace = TRUE), nrow = 4)  # 4x5 matriz aleatoria
+M
+
+# Crear matriz binaria del mismo tamaño
+binaria <- matrix(0, nrow = nrow(M), ncol = ncol(M))
+
+for (j in 1:ncol(M)) {
+  media_j <- mean(M[, j])
+  for (i in 1:nrow(M)) {
+    if (M[i, j] > media_j) {
+      binaria[i, j] <- 1
+    } else {
+      binaria[i, j] <- 0
+    }
+  }
+}
+
+binaria
+
+# 12) 
+df <- iris
+df$AboveMean <- 0   # inicializamos con 0
+
+especies <- unique(df$Species)
+
+for (s in especies) {
+  # media de Sepal.Length por especie
+  media_s <- mean(df$Sepal.Length[df$Species == s])
+  
+  for (i in 1:nrow(df)) {
+    if (df$Species[i] == s & df$Sepal.Length[i] > media_s) {
+      df$AboveMean[i] <- 1
+    }
+  }
+}
+
+head(df, 10)
+
+
+```
+:::
+
+
+
+# Funciones
+
+Una función es un bloque de código reutilizable que realiza una tarea específica. Nos permite organizar el código y evitar repeticiones. Pueden tener:
+
+  * Inputs: argumentos de entrada.
+  * Outputs: argumentos de salida.
+
+En R podemos encontrar principalmente dos tipos de funciones. Las predefinicas que ya vienen en el propio R y que hemos estado usando como por ejemplo `mean()`, `sum()`, `print()`, etc. También existen las funciones definidas por el usuario mediante la sentencia `function()`. Justo en estas últimas son en las que nos vamos a centrar en esta sección.
+
+Sintaxis:
+```r
+nombre_funcion <- function(argumento1, argumento2, ...) {
+  # instrucciones
+  # ...
+  return(resultado)
+}
+```
+
+  * nombre_funcion: será el nombre que le pongamos a la función. Al igual que los nombres que le ponemos a las variables, no puede contener espacios ni comenzar por caracteres especiales.
+  * argumento1, argumento2,... : son los inputs que recibe a la función. También los definimos nosotros.
+  * return(resultado): valor (u objeto) que devuelve la función. Si no se pone `return()` devuelve el último valor calculado.
+  
+  
+¿Qué ventaja tiene usar funciones?
+
+* Reutilización: Escribes el código una vez y lo usas las veces que quieras.
+* Claridad: Nombrar una función hace que el código sea más legible.
+* Modularidad: Separa el programa en partes lógicas.
+* Mantenimiento: Si hay que cambiar algo, solo modificas la función.
+
+## Ejemplos
+#### Función sin argumentos
+```{r}
+hola <- function() {
+  print("¡Hola mundo!")
+}
+hola()
+```
+
+#### Función con un argumento
+```{r}
+cuadrado <- function(x) {
+  return(x^2)
+}
+cuadrado(4)  # devuelve 16
+```
+
+#### Función con varios argumentos
+```{r}
+suma <- function(a, b) {
+  a + b  # también vale sin return, devuelve el último valor
+}
+suma(3, 5)
+```
+
+¡Ojo! Los argumentos se deben meter en el orden correcto.
+
+
+### Función con valores por defecto
+```{r}
+saludo <- function(nombre = "Estudiante") {
+  paste("Hola", nombre)
+}
+saludo()           # "Hola Estudiante"
+saludo("María")    # "Hola María"
+
+```
+
+### Función que usa condicionales
+```{r}
+clasificar_nota <- function(nota) {
+  if (nota < 5) {
+    return("Suspenso")
+  } else if (nota < 7) {
+    return("Aprobado")
+  } else if (nota < 9) {
+    return("Notable")
+  } else {
+    return("Sobresaliente")
+  }
+}
+clasificar_nota(8)
+
+```
+
+
+Algunas observaciones sobre las funciones:
+
+  * Las variables definidas dentro de la función son locales y no afectan a las de fuera.
+  * Parámetros por defecto: si no pasas ese argumento, toma ese valor.
+  * Si llamas a los inputs por posición, debes respetar el orden declarado en la función.
+  
+  
+
+::: {.callout-note}
+##  Ejercicios
+
+1. Crea una función `saludar()` que muestre "Hola a todos".
+
+2. Crea una función `doble(x)` que devuelva el doble de x.
+
+3. Crea una función `sumar3(a, b, c)` que devuelva la suma de tres números.
+
+4. Crea una función `par_impar(n)` que diga "Par" o "Impar".
+
+5. Crea una función `mayor(a, b)` que devuelva el mayor de dos números.
+
+6. Crea una función `es_positivo(x)` que devuelva TRUE o FALSE en función de si es positivo o no.
+
+7. Crea una función `positivos(v)` que reciba un vector y devuelva solo los números positivos.
+
+8. Crea una función `clasificar_numeros(v)` que devuelva "Positivo", "Negativo" o "Cero" para cada elemento de `v` (usa `ifelse()`).
+
+9. Crea una función `fibonacci(n)` que devuelva un vector con los n primeros términos de la serie de Fibonacci.
+
+10. Crea una función para el juego de piedra, papel o tijera que hemos ido programando a lo largo del Tema 2. ¿Qué input le pondrías?
+
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+
+# 1) saludar()
+saludar <- function() {
+  print("Hola a todos")
+}
+# saludar()
+
+# 2) doble(x)
+doble <- function(x) {
+  valor_final <- 2 * x
+  return(valor_final)
+}
+# doble(4)
+
+# 3) sumar3(a, b, c)
+sumar3 <- function(a, b, c) {
+  suma <- a + b + c
+  return(suma)
+}
+# sumar3(1, 2, 3)
+
+# 4) par_impar(n)
+par_impar <- function(n) {
+  if (n %% 2 == 0) {"Par"} else {"Impar"}
+}
+# par_impar(7)
+
+# 5) mayor(a, b)
+mayor <- function(a, b) {
+  if (a >= b){
+    a 
+  } else {
+    b
+  }
+}
+# mayor(3, 5)
+
+# 6) es_positivo(x)
+es_positivo <- function(x) {
+  comparacion <- x > 0
+  return(comparacion)
+}
+# es_positivo(c(-2, 0, 3))
+
+# 7) positivos(v)  -> devuelve solo los > 0
+positivos <- function(v) {
+  pos <- v[v > 0]
+  return(pos)
+}
+# positivos(c(-2, 3, 0, 5, -1))
+
+# 8) clasificar_numeros(v) -> "Positivo", "Negativo", "Cero"
+clasificar_numeros <- function(v) {
+  ifelse(v > 0, "Positivo", ifelse(v < 0, "Negativo", "Cero"))
+}
+# clasificar_numeros(c(-2, 0, 7))
+
+# 9) fibonacci(n) -> primeros n términos (comenzando 0, 1, 1, 2, ...)
+fibonacci <- function(n) {
+  
+  if (n<=0){
+    fib <- c('n debe ser un número entero mayor que 0')
+  } else if (n==1){
+    fib <- 0
+  } else if (n==2){
+    fib <- c(0,1)
+  } else{
+    fib <- numeric(n)
+    fib[1] <- 0
+    fib[2] <- 1
+    for (i in 3:n) {
+      fib[i] <- fib[i - 1] + fib[i - 2]
+    }
+  }
+  
+return(fib)
+}
+# fibonacci(10)
+
+
+
+
+```
+:::
+
+
+
+
+
+# Manejo de librerías
+
+En R, las librerías (también llamadas paquetes) son conjuntos de funciones, datos y documentación creados por la comunidad o por R Core para ampliar las funcionalidades básicas de R.
+
+Son como “extensiones” del lenguaje: no vienen en el “núcleo” de R, pero puedes instalarlas y usarlas cuando las necesitas.
+
+Por ejemplo, para visualizaciones avanzadas, análisis de datos, modelos estadísticos, manipulación de tablas, etc.
+
+¿Qué nos permiten las librerías?
+
+* Ahorrar tiempo: en lugar de programar desde cero, usas funciones ya hechas.
+
+* Ampliar tus posibilidades: hay miles de paquetes en CRAN.
+
+* Compartir código reutilizable con otros.
+
+## Instalación y carga de librerías
+### Instalación
+```r
+install.packages("nombreDelPaquete")
+```
+Se necesita conexión a internet y se hace únicamente la primera vez en tu sistema.
+
+### Carga (activar la librería en la sesión actual)
+
+```r
+library(nombreDelPaquete)
+```
+ o
+ 
+ 
+```r
+require(nombreDelPaquete)
+```
+Esto se hace cada vez que abres R y quieres usar ese paquete. Si no lo cargas, las funciones del paquete no estarán disponibles.
+
+**Diferencia importante**
+
+  * `install.packages()` → descarga e instala (una vez).
+  * `library()` → carga en memoria (cada sesión).
+  
+Algunas librerías famosas de R son:
+
+  * `ggplot2`: visualización avanzada.
+
+  * `dplyr`: manipulación de datos.
+
+  * `tidyr`: transformación de datos.
+
+  * `readr`: lectura de archivos.
+
+  * `lubridate`: fechas y tiempos.
+
+  * `stringr`: manipulación de cadenas de texto.
+
+  * `palmerpenguins`: dataset de ejemplo de pingüinos.
+  
+Ejemplo:
+```{r}
+install.packages("ggplot2")  # solo 1 vez
+library(ggplot2)             # cada sesión
+
+# Ahora podemos usar sus funciones:
+qplot(mpg, wt, data = mtcars)
+
+```
+
+
+
+::: {.callout-note}
+##  Ejercicios
+
+1. Instala la librería `palmerpenguins`.
+
+2. Cárgala con `library()`.
+
+3. Muestra las primeras filas del dataset `penguins`.
+
+4. Instala y carga `dplyr`.
+
+5. Usa `?dplyr` o `help(package = "dplyr")` para ver su documentación.
+
+6. Aplica la función `glimpse(penguins)` para inspeccionar el dataset.
+
+:::
+
+::: {.callout-tip collapse="true"}
+## Soluciones
+
+```{r}
+
+# 1,2,3
+install.packages("palmerpenguins")   # solo primera vez
+library(palmerpenguins)
+head(penguins)
+
+# 4,5,6
+install.packages("dplyr")   # solo primera vez
+library(dplyr)
+glimpse(penguins)
+
+```
+:::
+
+
+
+
